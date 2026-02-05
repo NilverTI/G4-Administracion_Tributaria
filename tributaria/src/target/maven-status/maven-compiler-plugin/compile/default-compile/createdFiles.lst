@@ -1,0 +1,11 @@
+com\tributaria\config\Conexion.class
+com\tributaria\dao\TipoPersonaDAO.class
+com\tributaria\Negocio\LoginService.class
+com\tributaria\dao\ContribuyenteDAO.class
+com\tributaria\model\Usuario.class
+com\tributaria\controladores\LoginServlet.class
+com\tributaria\model\TipoPersona.class
+com\tributaria\Negocio\ContribuyenteService.class
+com\tributaria\dao\PersonaDAO.class
+com\tributaria\model\Persona.class
+com\tributaria\dao\UsuarioDAO.class
