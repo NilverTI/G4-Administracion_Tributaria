@@ -1,0 +1,11 @@
+N:\Trii\tributaria\src\main\java\com\tributaria\config\Conexion.java
+N:\Trii\tributaria\src\main\java\com\tributaria\controladores\LoginServlet.java
+N:\Trii\tributaria\src\main\java\com\tributaria\dao\ContribuyenteDAO.java
+N:\Trii\tributaria\src\main\java\com\tributaria\dao\PersonaDAO.java
+N:\Trii\tributaria\src\main\java\com\tributaria\dao\TipoPersonaDAO.java
+N:\Trii\tributaria\src\main\java\com\tributaria\dao\UsuarioDAO.java
+N:\Trii\tributaria\src\main\java\com\tributaria\model\Persona.java
+N:\Trii\tributaria\src\main\java\com\tributaria\model\TipoPersona.java
+N:\Trii\tributaria\src\main\java\com\tributaria\model\Usuario.java
+N:\Trii\tributaria\src\main\java\com\tributaria\Negocio\ContribuyenteService.java
+N:\Trii\tributaria\src\main\java\com\tributaria\Negocio\LoginService.java
