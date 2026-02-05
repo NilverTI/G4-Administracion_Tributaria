@@ -55,7 +55,8 @@ Para cada caso, el sistema permitirá identificar el **estado del tributo**, con
 ---
 
 ## 📅 Año Académico
-**20260**  los mejores
+**20260**
+***3030**
 
 ---
 
