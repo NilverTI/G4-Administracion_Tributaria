@@ -1,0 +1,501 @@
+
+/* Header de página (reutilizable) */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.page-header-left h1 {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.page-header-left p {
+  color: var(--text-muted);
+  font-size: 13.5px;
+  margin-top: 3px;
+}
+
+/* Botón principal */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 11px 20px;
+  font-family: "Sora", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+  white-space: nowrap;
+}
+
+.btn-primary:hover {
+  background: var(--navy-light);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(15, 31, 61, .18);
+}
+
+.btn-primary i {
+  font-size: 16px;
+}
+
+/* Barra de filtros */
+.filter-bar {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.filter-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 14px;
+  flex: 1;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.filter-search:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, .10);
+}
+
+.filter-search input {
+  border: none;
+  background: none;
+  outline: none;
+  font-family: "Sora", sans-serif;
+  font-size: 13.5px;
+  color: var(--text);
+  width: 100%;
+}
+
+.filter-search input::placeholder {
+  color: var(--text-muted);
+}
+
+.filter-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 14px;
+  min-width: 150px;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.filter-select:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, .10);
+}
+
+.filter-select select {
+  border: none;
+  background: none;
+  outline: none;
+  font-family: "Sora", sans-serif;
+  font-size: 13.5px;
+  color: var(--text);
+  cursor: pointer;
+  width: 100%;
+  appearance: none;
+}
+
+/* Card de tabla */
+.table-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+/* Tabla */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table thead tr {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.data-table th {
+  padding: 13px 20px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+
+.data-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background .15s ease;
+}
+
+.data-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.data-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.data-table td {
+  padding: 15px 20px;
+  font-size: 13.5px;
+  vertical-align: middle;
+}
+
+/* Badges (estado) */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.badge-activo {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.badge-inactivo {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.badge-moroso {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Toggle btn (ACTIVO/INACTIVO) */
+.toggle-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: background .15s ease, transform .05s ease, color .15s ease;
+  color: var(--text-muted);
+}
+
+.toggle-btn:hover {
+  background: var(--bg);
+  color: var(--accent);
+}
+
+.toggle-btn:active {
+  transform: scale(.98);
+}
+
+.toggle-btn.activo:hover {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.toggle-btn.inactivo:hover {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Footer tabla */
+.table-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--card);
+}
+
+.table-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.table-info .info-main {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.table-info .info-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* =========================
+   PAGINATION (UNA SOLA PASTILLA / minimal)
+   - Sin líneas internas
+========================= */
+#pagination {
+  display: flex;
+  justify-content: flex-end;
+  /* usa center si prefieres */
+}
+
+.pagination {
+  display: inline-flex;
+  align-items: center;
+
+  /* 1 sola pastilla */
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 4px;
+
+  /* nada de separaciones */
+  gap: 0;
+  overflow: hidden;
+  box-shadow: 0 10px 26px rgba(15, 31, 61, .08);
+}
+
+/* Botones sin borde individual */
+.page-btn {
+  width: 42px;
+  height: 42px;
+
+  border: none;
+  outline: none;
+  background: transparent;
+
+  color: var(--text-muted);
+  font-family: "Sora", sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+  transition: background .15s ease, color .15s ease, transform .05s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.page-btn:active:not(:disabled) {
+  transform: scale(.98);
+}
+
+.page-btn.active {
+  background: var(--navy);
+  color: #fff;
+}
+
+.page-btn:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.page-dots {
+  padding: 0 10px;
+  color: var(--text-muted);
+  font-weight: 900;
+  user-select: none;
+}
+
+/* =========================
+   MODAL (para Nuevo Contribuyente/Inmueble/Vehículo/etc.)
+   - Esto arregla lo que te salió "a la derecha" sin estilo.
+========================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 31, 61, .45);
+  backdrop-filter: blur(3px);
+  z-index: 200;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal {
+  background: var(--card);
+  border-radius: 18px;
+  padding: 28px;
+  width: 520px;
+  max-width: calc(100vw - 32px);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, .16);
+
+  transform: translateY(18px);
+  transition: transform .25s ease;
+}
+
+.modal-overlay.open .modal {
+  transform: translateY(0);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.modal-header h2 {
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.modal-close {
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: var(--bg);
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: background .15s ease, color .15s ease, transform .05s ease;
+}
+
+.modal-close:hover {
+  background: #fee2e2;
+  color: var(--red);
+}
+
+.modal-close:active {
+  transform: scale(.98);
+}
+
+/* Form */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group.full {
+  grid-column: 1 / -1;
+}
+
+.form-label {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+.form-input {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-family: "Sora", sans-serif;
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  background: var(--bg);
+  transition: border-color .2s, box-shadow .2s, background .2s;
+}
+
+.form-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, .10);
+  background: #fff;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.btn-secondary {
+  padding: 10px 18px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  font-family: "Sora", sans-serif;
+  font-size: 13.5px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-weight: 700;
+  transition: background .15s ease, border-color .15s ease, color .15s ease, transform .05s ease;
+}
+
+.btn-secondary:hover {
+  background: #fff;
+  border-color: rgba(100, 116, 139, .55);
+  color: var(--text);
+}
+
+.btn-secondary:active {
+  transform: scale(.98);
+}
+
+/* Responsive (crud) */
+@media (max-width: 820px) {
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .table-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  #pagination {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

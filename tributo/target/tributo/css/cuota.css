@@ -1,0 +1,45 @@
+.page-subtitle {
+    margin-top: 6px;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.badge-pendiente {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.empty-table {
+    text-align: center;
+    padding: 20px;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+.badge-pendiente {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.empty-table {
+    text-align: center;
+    padding: 20px;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+.btn-primary {
+    text-decoration: none;
+}
+
+.btn-primary:hover {
+    text-decoration: none;
+}
+
+.modal-overlay {
+    display: none;
+}
+
+.modal-overlay.open {
+    display: flex;
+}

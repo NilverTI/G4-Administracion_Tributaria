@@ -1,0 +1,8 @@
+/* Sobrescribe títulos */
+.page-header-left h1 {
+    font-size: 24px;
+}
+
+.modal-header h2 {
+    content: "Nuevo Inmueble";
+}
