@@ -21,11 +21,47 @@ public class CuotaServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // ✅ LISTA CUOTAS
-        List<Object[]> lista = cuotaService.listarVista();
+        String action = request.getParameter("action");
+
+        // ✅ ENDPOINT JSON: detalle de cuotas por impuesto (para modal)
+        if ("detalle".equalsIgnoreCase(action)) {
+            Integer idImpuesto = parseInt(request.getParameter("idImpuesto"));
+            if (idImpuesto == null) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"error\":\"idImpuesto requerido\"}");
+                return;
+            }
+
+            List<Object[]> cuotas = cuotaService.listarCuotasPorImpuesto(idImpuesto);
+
+            response.setContentType("application/json;charset=UTF-8");
+            StringBuilder json = new StringBuilder("[");
+            for (int i = 0; i < cuotas.size(); i++) {
+                Object[] c = cuotas.get(i);
+
+                // Esperado (ideal): 0=idCuota,1=numero,2=totalCuotas,3=monto,4=vencimiento,5=estado
+                json.append("{")
+                        .append("\"id\":").append(c[0]).append(",")
+                        .append("\"numero\":").append(c[1]).append(",")
+                        .append("\"total\":").append(c[2]).append(",")
+                        .append("\"monto\":\"").append(String.valueOf(c[3])).append("\",")
+                        .append("\"vencimiento\":\"").append(String.valueOf(c[4])).append("\",")
+                        .append("\"estado\":\"").append(escapeJson(String.valueOf(c[5]))).append("\"")
+                        .append("}");
+
+                if (i < cuotas.size() - 1) json.append(",");
+            }
+            json.append("]");
+            response.getWriter().write(json.toString());
+            return;
+        }
+
+        // ✅ LISTA PRINCIPAL AGRUPADA (1 fila por impuesto fraccionado)
+        var lista = cuotaService.listarFraccionamientosAgrupados();
         request.setAttribute("lista", lista);
 
-        // ✅ COMBO: impuestos disponibles para fraccionar
+        // ✅ COMBO: impuestos disponibles para fraccionar (SP)
         try {
             List<Object[]> impuestos = cuotaService.listarImpuestosParaFraccionar();
             request.setAttribute("impuestos", impuestos);
@@ -79,11 +115,20 @@ public class CuotaServlet extends HttpServlet {
 
     private Integer parseInt(String s) {
         if (s == null || s.trim().isEmpty()) return null;
-        return Integer.parseInt(s.trim());
+        try {
+            return Integer.parseInt(s.trim());
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private void redirectMsg(HttpServletResponse response, String baseUrl, String key, String msg) throws IOException {
         String enc = URLEncoder.encode(msg, StandardCharsets.UTF_8);
         response.sendRedirect(baseUrl + "?" + key + "=" + enc);
+    }
+
+    private String escapeJson(String s) {
+        if (s == null) return "";
+        return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }

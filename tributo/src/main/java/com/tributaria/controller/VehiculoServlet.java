@@ -31,16 +31,14 @@ public class VehiculoServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/funcionario/vehiculo");
             return;
         }
-        
-        
+
         req.setAttribute("lista", vehiculoServ.listar());
-        
+
         req.setAttribute("contribuyentes", contribServ.listarActivosCombo());
 
         req.getRequestDispatcher("/views/funcionario/vehiculo/lista.jsp")
-           .forward(req, resp);
-        
-        
+                .forward(req, resp);
+
     }
 
     @Override
@@ -54,7 +52,12 @@ public class VehiculoServlet extends HttpServlet {
         int anio = Integer.parseInt(req.getParameter("anio"));
         String fechaInscripcion = req.getParameter("fechaInscripcion");
         BigDecimal valor = new BigDecimal(req.getParameter("valor"));
-        BigDecimal porcentaje = new BigDecimal(req.getParameter("porcentaje"));
+
+        // 🔥 Tomar AÑO de la fecha de inscripción
+        int anioInscripcion = Integer.parseInt(fechaInscripcion.substring(0, 4));
+
+        // 🔥 Obtener porcentaje según configuraciones
+        BigDecimal porcentaje = vehiculoServ.porcentajePorAnio(anioInscripcion);
 
         vehiculoServ.crear(
                 idContribuyente,
@@ -64,11 +67,11 @@ public class VehiculoServlet extends HttpServlet {
                 anio,
                 fechaInscripcion,
                 valor,
-                porcentaje
-        );
+                porcentaje);
 
         resp.sendRedirect(req.getContextPath() + "/funcionario/vehiculo");
     }
 
     
+
 }

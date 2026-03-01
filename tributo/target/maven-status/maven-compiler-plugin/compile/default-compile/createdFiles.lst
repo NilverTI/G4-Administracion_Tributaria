@@ -4,6 +4,7 @@ com\tributaria\filter\AuthFilter.class
 com\tributaria\service\InmuebleService.class
 com\tributaria\util\TestConexion.class
 com\tributaria\controller\PagoServlet.class
+com\tributaria\dao\ConfiguracionDAO.class
 com\tributaria\entity\Impuesto.class
 com\tributaria\entity\Persona.class
 com\tributaria\service\UsuarioService.class
@@ -12,8 +13,10 @@ com\tributaria\util\JPAUtil.class
 com\tributaria\controller\CuotaServlet.class
 com\tributaria\dao\ImpuestoDAO.class
 com\tributaria\dao\PagoDAO.class
+com\tributaria\entity\Vehiculo.class
 com\tributaria\dao\UsuarioDAO.class
 com\tributaria\entity\Contribuyente.class
+com\tributaria\service\ConfiguracionService.class
 com\tributaria\dao\CuotaDAO.class
 com\tributaria\service\ContribuyenteService.class
 com\tributaria\dao\InmuebleDAO.class

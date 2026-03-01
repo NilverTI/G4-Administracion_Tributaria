@@ -24,5 +24,53 @@ public class Alcabala {
 
     private String estado;
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Inmueble getInmueble() {
+        return inmueble;
+    }
+
+    public void setInmueble(Inmueble inmueble) {
+        this.inmueble = inmueble;
+    }
+
+    public BigDecimal getValorVenta() {
+        return valorVenta;
+    }
+
+    public void setValorVenta(BigDecimal valorVenta) {
+        this.valorVenta = valorVenta;
+    }
+
+    public LocalDate getFechaVenta() {
+        return fechaVenta;
+    }
+
+    public void setFechaVenta(LocalDate fechaVenta) {
+        this.fechaVenta = fechaVenta;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public Alcabala(Integer id, Inmueble inmueble, BigDecimal valorVenta, LocalDate fechaVenta, String estado) {
+        this.id = id;
+        this.inmueble = inmueble;
+        this.valorVenta = valorVenta;
+        this.fechaVenta = fechaVenta;
+        this.estado = estado;
+    }
+
     // getters y setters
 }

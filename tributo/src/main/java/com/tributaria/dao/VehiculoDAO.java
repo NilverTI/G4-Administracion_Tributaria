@@ -9,6 +9,7 @@ import java.util.List;
 public class VehiculoDAO {
 
     // LISTAR VEHÍCULOS
+    @SuppressWarnings("unchecked")
     public List<Object[]> listar() {
         EntityManager em = JPAUtil.getEntityManager();
         try {
@@ -28,7 +29,8 @@ public class VehiculoDAO {
             int anio,
             String fechaInscripcion,
             BigDecimal valor,
-            BigDecimal porcentaje) {
+            BigDecimal porcentaje
+    ) {
         EntityManager em = JPAUtil.getEntityManager();
         EntityTransaction tx = em.getTransaction();
 
@@ -59,7 +61,7 @@ public class VehiculoDAO {
             tx.commit();
 
         } catch (Exception e) {
-            tx.rollback();
+            if (tx.isActive()) tx.rollback();
             throw e;
         } finally {
             em.close();
@@ -86,7 +88,7 @@ public class VehiculoDAO {
             tx.commit();
 
         } catch (Exception e) {
-            tx.rollback();
+            if (tx.isActive()) tx.rollback();
             throw e;
         } finally {
             em.close();
@@ -116,4 +118,32 @@ public class VehiculoDAO {
             em.close();
         }
     }
+
+    // ✅ OBTENER % VEHICULAR VIGENTE (SP)
+    public BigDecimal obtenerPorcentajeVigente() {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            StoredProcedureQuery sp = em.createStoredProcedureQuery("sp_porcentaje_vehicular_vigente");
+
+            Object result = sp.getSingleResult();
+            if (result == null) return BigDecimal.ZERO;
+
+            return new BigDecimal(result.toString());
+
+        } finally {
+            em.close();
+        }
+    }
+    
+    public boolean existePlaca(String placa) {
+    EntityManager em = JPAUtil.getEntityManager();
+    try {
+        Number n = (Number) em.createNativeQuery(
+                "SELECT COUNT(*) FROM vehiculo WHERE placa = ?"
+        ).setParameter(1, placa).getSingleResult();
+        return n.intValue() > 0;
+    } finally {
+        em.close();
+    }
+}
 }

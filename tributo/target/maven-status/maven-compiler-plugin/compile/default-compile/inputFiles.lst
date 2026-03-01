@@ -8,6 +8,7 @@ N:\Trii\tributo\src\main\java\com\tributaria\controller\PagoServlet.java
 N:\Trii\tributo\src\main\java\com\tributaria\controller\ContribuyenteServlet.java
 N:\Trii\tributo\src\main\java\com\tributaria\controller\VehiculoServlet.java
 N:\Trii\tributo\src\main\java\com\tributaria\entity\Impuesto.java
+N:\Trii\tributo\src\main\java\com\tributaria\service\ConfiguracionService.java
 N:\Trii\tributo\src\main\java\com\tributaria\entity\Rol.java
 N:\Trii\tributo\src\main\java\com\tributaria\entity\Usuario.java
 N:\Trii\tributo\src\main\java\com\tributaria\dao\CuotaDAO.java
@@ -21,6 +22,7 @@ N:\Trii\tributo\src\main\java\com\tributaria\dao\ImpuestoDAO.java
 N:\Trii\tributo\src\main\java\com\tributaria\entity\Persona.java
 N:\Trii\tributo\src\main\java\com\tributaria\controller\ConfiguracionServlet.java
 N:\Trii\tributo\src\main\java\com\tributaria\service\InmuebleService.java
+N:\Trii\tributo\src\main\java\com\tributaria\dao\ConfiguracionDAO.java
 N:\Trii\tributo\src\main\java\com\tributaria\dao\UsuarioDAO.java
 N:\Trii\tributo\src\main\java\com\tributaria\util\TestHash.java
 N:\Trii\tributo\src\main\java\com\tributaria\controller\ImpuestoServlet.java

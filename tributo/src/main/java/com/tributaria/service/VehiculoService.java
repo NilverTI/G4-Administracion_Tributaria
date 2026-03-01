@@ -7,7 +7,8 @@ import java.util.List;
 
 public class VehiculoService {
 
-    private VehiculoDAO dao = new VehiculoDAO();
+    private final VehiculoDAO dao = new VehiculoDAO();
+    private final ConfiguracionService configServ = new ConfiguracionService();
 
     public List<Object[]> listar() {
         return dao.listar();
@@ -22,6 +23,7 @@ public class VehiculoService {
             String fechaInscripcion,
             BigDecimal valor,
             BigDecimal porcentaje) {
+
         dao.crear(idContribuyente, placa, marca, modelo, anio, fechaInscripcion, valor, porcentaje);
     }
 
@@ -35,5 +37,14 @@ public class VehiculoService {
 
     public int contarActivos() {
         return dao.contarActivos();
+    }
+
+    // ✅ ESTE ES EL QUE TE FALTABA (para VehiculoServlet)
+    public BigDecimal porcentajePorAnio(int anio) {
+        return configServ.obtenerPorcentajeVehicularPorAnio(anio);
+    }
+
+    public boolean existePlaca(String placa) {
+        return dao.existePlaca(placa);
     }
 }

@@ -20,7 +20,7 @@ public class CuotaDAO {
         }
     }
 
-    // ✅ Para la vista de CUOTAS (SP)
+    // ✅ Para la vista plana de CUOTAS (SP)
     @SuppressWarnings("unchecked")
     public List<Object[]> listarVista() {
         EntityManager em = JPAUtil.getEntityManager();
@@ -32,36 +32,34 @@ public class CuotaDAO {
         }
     }
 
-    // ✅ COMBO: Impuestos disponibles para fraccionar
-    // Esperado por tu JSP:
-    // i[0]=id_impuesto, i[1]=IMP0001, i[2]=Nombre Apellido, i[3]=tipo, i[4]=anio, i[5]=monto_total
+    // ✅ MODAL: listar cuotas de un impuesto (SP ya existe en tu BD)
+    // Esperado (ideal): id_cuota, numero, total_cuotas, monto, vencimiento, estado
     @SuppressWarnings("unchecked")
-    public List<Object[]> listarImpuestosParaFraccionar() {
+    public List<Object[]> listarCuotasPorImpuesto(int idImpuesto) {
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            // Solo impuestos NO fraccionados y NO pagados
-            // (ajusta el filtro si quieres)
-            String sql = """
-                SELECT
-                  i.id_impuesto,
-                  i.codigo,
-                  CONCAT(p.nombres,' ',p.apellidos) AS contribuyente,
-                  i.tipo,
-                  i.anio,
-                  i.monto_total
-                FROM impuesto i
-                JOIN contribuyentes co ON co.id_contribuyente = i.id_contribuyente
-                JOIN personas p ON p.id_persona = co.id_persona
-                WHERE UPPER(IFNULL(i.estado,'PENDIENTE')) NOT IN ('FRACCIONADO','PAGADO')
-                ORDER BY i.id_impuesto DESC
-            """;
-            return em.createNativeQuery(sql).getResultList();
+            return em.createNativeQuery("CALL sp_listar_cuotas_por_impuesto(?)")
+                    .setParameter(1, idImpuesto)
+                    .getResultList();
         } finally {
             em.close();
         }
     }
 
-    // ✅ FRACCIONAR IMPUESTO EXISTENTE (SP nuevo de 3 params)
+    // ✅ COMBO: Impuestos disponibles para fraccionar (SP ya existe en tu BD)
+    // i[0]=id_impuesto, i[1]=IMP0001, i[2]=Nombre Apellido, i[3]=tipo, i[4]=anio, i[5]=monto_total
+    @SuppressWarnings("unchecked")
+    public List<Object[]> listarImpuestosParaFraccionar() {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createNativeQuery("CALL sp_listar_impuestos_para_fraccionar()")
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // ✅ FRACCIONAR IMPUESTO (SP ya existe en tu BD)
     public void fraccionarImpuesto(int idImpuesto, int numeroCuotas, LocalDate fechaPrimeraCuota) {
         EntityManager em = JPAUtil.getEntityManager();
         try {
@@ -82,7 +80,7 @@ public class CuotaDAO {
         }
     }
 
-    // ✅ PARA PAGOS: trae impuesto con JOIN FETCH para evitar LazyInitializationException
+    // ✅ PARA PAGOS: trae cuotas pendientes
     public List<Cuota> listarPendientes() {
         EntityManager em = JPAUtil.getEntityManager();
         try {
