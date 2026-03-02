@@ -7,11 +7,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Configuración del Sistema</title>
+  <title>Gestión de Cuotas</title>
 
   <!-- CSS GLOBAL -->
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/layout.css">
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dashboard.css">
-  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/contribuyente.css">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/cuota.css">
 
   <!-- Google Fonts -->
   <link rel="stylesheet"
@@ -20,32 +21,9 @@
   <!-- Iconos -->
   <link rel="stylesheet"
         href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
-
-  <style>
-    /* Tabs (minimal) */
-    .tabs { display:flex; gap:12px; margin-bottom: 22px; }
-    .tab-btn{
-      padding: 10px 20px;
-      border-radius: 12px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 700;
-      transition: .2s;
-    }
-    .tab-btn.active{
-      background: var(--navy);
-      color:#fff;
-      border-color: var(--navy);
-    }
-    .tab-content{ display:none; }
-    .tab-content.active{ display:block; }
-  </style>
 </head>
 
 <body>
-
 <%@ include file="/includes/sidebar.jsp" %>
 
 <main class="main">
@@ -54,166 +32,185 @@
   <div class="content">
 
     <!-- Header -->
-    <div class="page-header">
+    <div class="page-header cuota-header">
       <div class="page-header-left">
-        <h1>Configuración del Sistema</h1>
-        <p>Gestión de zonas, UIT y parámetros vehiculares</p>
+        <h1>Gestión de Cuotas</h1>
+        <p>
+          <c:choose>
+            <c:when test="${not empty lista}">
+              <c:out value="${fn:length(lista)}"/> fraccionamientos registrados
+            </c:when>
+            <c:otherwise>0 fraccionamientos registrados</c:otherwise>
+          </c:choose>
+        </p>
       </div>
 
-      <!-- ✅ Botón único (arriba derecha). JS lo cambia según tab -->
-      <button class="btn-primary" id="btnNuevoItem" type="button">
-        <i class="fi fi-rr-plus"></i> Nuevo
+      <button class="btn-primary" type="button" id="btnCrearFracc">
+        <i class="fi fi-rr-plus"></i> Crear Fraccionamiento
       </button>
     </div>
 
-    <!-- Tabs -->
-    <div class="tabs" role="tablist" aria-label="Configuración">
-      <button class="tab-btn active" type="button" data-tab="tab-zonas">Zonas</button>
-      <button class="tab-btn" type="button" data-tab="tab-uit">UIT</button>
-      <button class="tab-btn" type="button" data-tab="tab-veh">Vehicular %</button>
+    <!-- Alerts -->
+    <c:if test="${not empty err}">
+      <div class="alert alert-error"><c:out value="${err}"/></div>
+    </c:if>
+    <c:if test="${not empty ok}">
+      <div class="alert alert-ok"><c:out value="${ok}"/></div>
+    </c:if>
+
+    <!-- Filters -->
+    <div class="toolbar">
+      <div class="searchbox">
+        <i class="fi fi-rr-search"></i>
+        <input id="searchInput" type="text" placeholder="Buscar por contribuyente o impuesto..." autocomplete="off">
+      </div>
+
+      <div class="filterbox">
+        <i class="fi fi-rr-filter"></i>
+        <select id="estadoFilter">
+          <option value="TODOS">Todos</option>
+          <option value="PENDIENTE">Pendiente</option>
+          <option value="PARCIAL">Parcial</option>
+          <option value="PAGADO">Pagado</option>
+        </select>
+      </div>
     </div>
 
-    <!-- ================= ZONAS ================= -->
-    <section class="tab-content active" id="tab-zonas">
-      <div class="table-card">
-        <table class="data-table">
-          <thead>
-          <tr>
-            <th>ID</th>
-            <th>Código</th>
-            <th>Nombre</th>
-            <th>Tasa</th>
-            <th>Estado</th>
-            <th>Acción</th>
-          </tr>
-          </thead>
-          <tbody>
-          <c:forEach var="z" items="${zonas}">
+    <!-- Table -->
+    <div class="table-card">
+      <table class="data-table" id="tablaFracc">
+        <thead>
+        <tr>
+          <th>Impuesto</th>
+          <th>Contribuyente</th>
+          <th>Tipo</th>
+          <th>Año</th>
+          <th>Cuotas</th>
+          <th>Total</th>
+          <th>Próx. venc.</th>
+          <th>Estado</th>
+          <th>Acción</th>
+        </tr>
+        </thead>
+        <tbody>
+        <c:choose>
+          <c:when test="${empty lista}">
             <tr>
-              <td><c:out value="${z[0]}"/></td>
-              <td><c:out value="${z[1]}"/></td>
-              <td><c:out value="${z[2]}"/></td>
-              <td><c:out value="${z[3]}"/>%</td>
-              <td>
-                <c:choose>
-                  <c:when test="${z[4] == 'ACTIVO'}">
-                    <span class="badge badge-activo">Activo</span>
-                  </c:when>
-                  <c:otherwise>
-                    <span class="badge badge-inactivo">Inactivo</span>
-                  </c:otherwise>
-                </c:choose>
-              </td>
-              <td>
-                <a class="toggle-btn"
-                   href="${pageContext.request.contextPath}/funcionario/configuracion?action=zonas.estado&id=${z[0]}&estado=${z[4]=='ACTIVO'?'INACTIVO':'ACTIVO'}"
-                   title="Cambiar estado">
-                  <i class="fi fi-rr-refresh"></i>
-                </a>
-              </td>
+              <td colspan="9" class="empty-row">No hay fraccionamientos registrados.</td>
             </tr>
-          </c:forEach>
-          </tbody>
-        </table>
-      </div>
-    </section>
+          </c:when>
 
-    <!-- ================= UIT ================= -->
-    <section class="tab-content" id="tab-uit">
-      <div class="table-card">
-        <table class="data-table">
-          <thead>
-          <tr>
-            <th>Año</th>
-            <th>Valor (S/)</th>
-            <th>Acción</th>
-          </tr>
-          </thead>
-          <tbody>
-          <c:forEach var="u" items="${uits}">
-            <tr>
-              <td><c:out value="${u[0]}"/></td>
-              <td>S/ <c:out value="${u[1]}"/></td>
-              <td>
-                <button type="button" class="toggle-btn"
-                        data-edit-uit="1"
-                        data-anio="${u[0]}"
-                        data-valor="${u[1]}"
-                        title="Editar UIT">
-                  <i class="fi fi-rr-edit"></i>
-                </button>
-              </td>
-            </tr>
-          </c:forEach>
-          </tbody>
-        </table>
-      </div>
-    </section>
+          <c:otherwise>
+            <c:forEach var="g" items="${lista}">
+              <tr class="fracc-row"
+                  data-impuesto="${g.codigoImpuesto}"
+                  data-contribuyente="${g.contribuyente}"
+                  data-estado="${g.estadoGeneral}">
 
-    <!-- ================= VEHICULAR ================= -->
-    <section class="tab-content" id="tab-veh">
-      <div class="table-card">
-        <table class="data-table">
-          <thead>
-          <tr>
-            <th>Año</th>
-            <th>Porcentaje</th>
-            <th>Estado</th>
-            <th>Acción</th>
-          </tr>
-          </thead>
-          <tbody>
-          <c:forEach var="v" items="${vehiculares}">
-            <tr>
-              <td><c:out value="${v[0]}"/></td>
-              <td><c:out value="${v[1]}"/> %</td>
-              <td>
-                <c:choose>
-                  <c:when test="${v[2]=='ACTIVO'}">
-                    <span class="badge badge-activo">Activo</span>
-                  </c:when>
-                  <c:otherwise>
-                    <span class="badge badge-inactivo">Inactivo</span>
-                  </c:otherwise>
-                </c:choose>
-              </td>
-              <td>
-                <a class="toggle-btn"
-                   href="${pageContext.request.contextPath}/funcionario/configuracion?action=veh.estado&anio=${v[0]}&estado=${v[2]=='ACTIVO'?'INACTIVO':'ACTIVO'}"
-                   title="Cambiar estado">
-                  <i class="fi fi-rr-refresh"></i>
-                </a>
-              </td>
-            </tr>
-          </c:forEach>
-          </tbody>
-        </table>
-      </div>
-    </section>
+                <td><c:out value="${g.codigoImpuesto}"/></td>
+                <td><c:out value="${g.contribuyente}"/></td>
+
+                <!-- Tipo / Año: vienen vacíos si tu SP no los devuelve.
+                     Igual los dejamos listos para cuando lo actualices. -->
+                <td><c:out value="${g.tipo}"/></td>
+                <td><c:out value="${g.anio}"/></td>
+
+                <td><c:out value="${g.totalCuotas}"/></td>
+
+                <td>
+                  S/
+                  <fmt:formatNumber value="${g.totalMonto}" minFractionDigits="2" maxFractionDigits="2"/>
+                </td>
+
+                <td>
+                  <c:choose>
+                    <c:when test="${empty g.proximoVenc}">—</c:when>
+                    <c:otherwise><c:out value="${g.proximoVenc}"/></c:otherwise>
+                  </c:choose>
+                </td>
+
+                <td>
+                  <c:choose>
+                    <c:when test="${g.estadoGeneral == 'PAGADO'}">
+                      <span class="badge badge-pagado">Pagado</span>
+                    </c:when>
+                    <c:when test="${g.estadoGeneral == 'PARCIAL'}">
+                      <span class="badge badge-parcial">Parcial</span>
+                    </c:when>
+                    <c:otherwise>
+                      <span class="badge badge-pendiente">Pendiente</span>
+                    </c:otherwise>
+                  </c:choose>
+                </td>
+
+                <td>
+                  <button type="button"
+                          class="btn-light btnVerCuotas"
+                          data-id-impuesto="${g.idImpuesto}">
+                    Ver cuotas
+                  </button>
+                </td>
+
+              </tr>
+            </c:forEach>
+          </c:otherwise>
+        </c:choose>
+        </tbody>
+      </table>
+    </div>
 
   </div>
 </main>
 
-<!-- Modal genérico -->
-<div class="modal-overlay" id="modalOverlay" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true">
+
+<!-- ================= MODAL: CREAR FRACCIONAMIENTO ================= -->
+<div class="modal-overlay" id="modalFracc" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalFraccTitle">
 
     <div class="modal-header">
-      <h2 id="modalTitle"></h2>
-      <button type="button" class="modal-close" onclick="closeModal()" title="Cerrar">
+      <h2 id="modalFraccTitle">Crear fraccionamiento</h2>
+      <button type="button" class="modal-close" data-close="modalFracc" title="Cerrar">
         <i class="fi fi-rr-cross-small"></i>
       </button>
     </div>
 
-    <!-- ✅ action apunta al servlet -->
-    <form method="post" action="${pageContext.request.contextPath}/funcionario/configuracion">
-      <input type="hidden" name="action" id="modalAction">
-      <div class="form-grid" id="modalFields"></div>
+    <form method="post" action="${pageContext.request.contextPath}/funcionario/cuota">
+      <input type="hidden" name="action" value="crearFraccionamiento">
+
+      <div class="form-grid">
+
+        <div class="form-field">
+          <label>Impuesto</label>
+          <select name="idImpuesto" required>
+            <option value="" disabled selected>Selecciona un impuesto</option>
+            <c:forEach var="i" items="${impuestos}">
+              <!-- i[0]=id_impuesto, i[1]=IMP0001, i[2]=Nombre, i[3]=tipo, i[4]=anio, i[5]=monto_total -->
+              <option value="${i[0]}">
+                <c:out value="${i[1]}"/> - <c:out value="${i[2]}"/>
+                <c:if test="${not empty i[3]}"> | <c:out value="${i[3]}"/></c:if>
+                <c:if test="${not empty i[4]}"> - <c:out value="${i[4]}"/></c:if>
+                <c:if test="${not empty i[5]}"> | S/ <c:out value="${i[5]}"/></c:if>
+              </option>
+            </c:forEach>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label>Número de cuotas</label>
+          <input type="number" name="numeroCuotas" min="1" max="60" required>
+        </div>
+
+        <div class="form-field">
+          <label>Fecha primera cuota</label>
+          <input type="date" name="fechaPrimeraCuota" required>
+        </div>
+
+      </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn-secondary" onclick="closeModal()">Cancelar</button>
+        <button type="button" class="btn-secondary" data-close="modalFracc">Cancelar</button>
         <button type="submit" class="btn-primary">
-          <i class="fi fi-rr-disk"></i> Guardar
+          <i class="fi fi-rr-disk"></i> Crear
         </button>
       </div>
     </form>
@@ -221,64 +218,48 @@
   </div>
 </div>
 
-<!-- JS (cache-bust) -->
-<script src="${pageContext.request.contextPath}/js/configuracion.js?v=3"></script>
 
-<script>
-  // ✅ Fallback mínimo por si configuracion.js no carga (evita que se "muera" todo)
-  // Si tu configuracion.js está bien, esto no estorba.
-  (function(){
-    const btnNuevoItem = document.getElementById("btnNuevoItem");
-    const tabBtns = document.querySelectorAll(".tab-btn");
-    const tabContents = document.querySelectorAll(".tab-content");
+<!-- ================= MODAL: DETALLE CUOTAS ================= -->
+<div class="modal-overlay" id="modalDetalle" aria-hidden="true">
+  <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="modalDetalleTitle">
 
-    function setHeaderButton(tabId){
-      if(!btnNuevoItem) return;
+    <div class="modal-header">
+      <h2 id="modalDetalleTitle">Detalle de cuotas</h2>
+      <button type="button" class="modal-close" data-close="modalDetalle" title="Cerrar">
+        <i class="fi fi-rr-cross-small"></i>
+      </button>
+    </div>
 
-      if(tabId === "tab-zonas"){
-        btnNuevoItem.innerHTML = '<i class="fi fi-rr-plus"></i> Nueva zona';
-        btnNuevoItem.onclick = () => window.openModal && window.openModal("zonas");
-      } else if(tabId === "tab-uit"){
-        btnNuevoItem.innerHTML = '<i class="fi fi-rr-plus"></i> Registrar UIT';
-        btnNuevoItem.onclick = () => window.openModal && window.openModal("uit");
-      } else if(tabId === "tab-veh"){
-        btnNuevoItem.innerHTML = '<i class="fi fi-rr-plus"></i> Nuevo porcentaje';
-        btnNuevoItem.onclick = () => window.openModal && window.openModal("veh");
-      } else {
-        btnNuevoItem.innerHTML = '<i class="fi fi-rr-plus"></i> Nuevo';
-        btnNuevoItem.onclick = null;
-      }
-    }
+    <div class="modal-body">
+      <div class="detalle-meta" id="detalleMeta">Cargando…</div>
 
-    // Tabs (si no hay JS externo)
-    tabBtns.forEach(btn=>{
-      btn.addEventListener("click", (e)=>{
-        e.preventDefault();
-        tabBtns.forEach(b=>b.classList.remove("active"));
-        tabContents.forEach(c=>c.classList.remove("active"));
+      <div class="table-card">
+        <table class="data-table" id="tablaDetalle">
+          <thead>
+          <tr>
+            <th>N°</th>
+            <th>Vencimiento</th>
+            <th>Monto</th>
+            <th>Estado</th>
+          </tr>
+          </thead>
+          <tbody id="detalleBody">
+          <tr><td colspan="4" class="empty-row">Cargando…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-        btn.classList.add("active");
-        const id = btn.dataset.tab;
-        const panel = document.getElementById(id);
-        if(panel) panel.classList.add("active");
+    <div class="modal-footer">
+      <button type="button" class="btn-secondary" data-close="modalDetalle">Cerrar</button>
+    </div>
 
-        setHeaderButton(id);
-      });
-    });
+  </div>
+</div>
 
-    const active = document.querySelector(".tab-btn.active");
-    setHeaderButton(active?.dataset?.tab || "tab-zonas");
 
-    // Edit UIT (sin onclick inline)
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-edit-uit='1']");
-      if(!btn) return;
-      const anio = btn.getAttribute("data-anio");
-      const valor = btn.getAttribute("data-valor");
-      if(window.openModalEditUIT) window.openModalEditUIT(anio, valor);
-    });
-  })();
-</script>
+<!-- JS -->
+<script src="${pageContext.request.contextPath}/js/cuota.js?v=1"></script>
 
 </body>
 </html>

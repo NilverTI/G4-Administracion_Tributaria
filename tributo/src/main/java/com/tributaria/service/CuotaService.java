@@ -36,7 +36,7 @@ public class CuotaService {
     }
 
     public List<Object[]> listarVista() {
-        return cuotaDAO.listarVista();
+        return cuotaDAO.listarVista(); // CALL sp_listar_cuotas()
     }
 
     public List<Object[]> listarImpuestosParaFraccionar() {
@@ -48,42 +48,48 @@ public class CuotaService {
     }
 
     public List<Object[]> listarCuotasPorImpuesto(int idImpuesto) {
-        return cuotaDAO.listarCuotasPorImpuesto(idImpuesto);
+        return cuotaDAO.listarCuotasPorImpuesto(idImpuesto); // numero, venc, monto, estado
     }
 
+    /**
+     * Agrupa cuotas por impuesto (1 fila por IMPxxxx).
+     * Se basa en tu SP sp_listar_cuotas() real.
+     */
     public List<Map<String, Object>> listarFraccionamientosAgrupados() {
-        List<Object[]> rows = cuotaDAO.listarVista(); // CALL sp_listar_cuotas()
-        final int IDX_ID_IMP = 0;
-        final int IDX_COD_IMP = 1;
-        final int IDX_CONTRI = 2;
 
-        final int IDX_TIPO = 3;
-        final int IDX_ANIO = 4;
-
-        final int IDX_TOTAL_CUOTAS = 6;
-        final int IDX_MONTO_CUOTA = 7;
-        final int IDX_VENC = 8;
-        final int IDX_ESTADO = 9;
-
+        List<Object[]> rows = cuotaDAO.listarVista();
         Map<Integer, Map<String, Object>> grouped = new LinkedHashMap<>();
 
         for (Object[] r : rows) {
-            if (r == null || r.length == 0)
+            if (r == null || r.length < 11)
                 continue;
 
-            Integer idImp = toInt(r[IDX_ID_IMP]);
+            // SP real:
+            // 0=id_impuesto, 1=codigo_impuesto, 2=contribuyente, 3=tipo, 4=anio,
+            // 5=id_cuota, 6=numero, 7=total_cuotas, 8=monto, 9=vencimiento, 10=estado
+
+            Integer idImp = toInt(r[0]);
+            String codImp = str(r[1]);
+            String contribuyente = str(r[2]);
+            String tipo = str(r[3]);
+            String anio = str(r[4]);
+
+            if (idImp == null || idImp <= 0)
+                continue;
 
             Map<String, Object> g = grouped.get(idImp);
             if (g == null) {
                 g = new HashMap<>();
                 g.put("idImpuesto", idImp);
-                g.put("codigoImpuesto", str(r[IDX_COD_IMP]));
-                g.put("contribuyente", str(r[IDX_CONTRI]));
-                g.put("tipo", idxSafe(r, IDX_TIPO) ? str(r[IDX_TIPO]) : "");
-                g.put("anio", idxSafe(r, IDX_ANIO) ? str(r[IDX_ANIO]) : "");
+                g.put("codigoImpuesto", codImp);
+                g.put("contribuyente", contribuyente);
 
-                g.put("totalCuotas", idxSafe(r, IDX_TOTAL_CUOTAS) ? toInt(r[IDX_TOTAL_CUOTAS]) : 0);
-                g.put("totalMonto", BigDecimal.ZERO);
+                // ✅ YA VIENEN DEL SP
+                g.put("tipo", tipo);
+                g.put("anio", anio);
+
+                g.put("totalCuotas", toInt(r[7])); // total_cuotas
+                g.put("totalMonto", java.math.BigDecimal.ZERO);
 
                 g.put("proximoVenc", null);
                 g.put("pagadas", 0);
@@ -92,47 +98,61 @@ public class CuotaService {
                 grouped.put(idImp, g);
             }
 
-            // sumar monto cuota
-            if (idxSafe(r, IDX_MONTO_CUOTA)) {
-                BigDecimal monto = toBig(r[IDX_MONTO_CUOTA]);
-                g.put("totalMonto", ((BigDecimal) g.get("totalMonto")).add(monto));
-            }
+            // ✅ monto (col 8)
+            java.math.BigDecimal monto = toBig(r[8]);
+            g.put("totalMonto", ((java.math.BigDecimal) g.get("totalMonto")).add(monto));
 
-            // estado
-            String est = idxSafe(r, IDX_ESTADO) ? str(r[IDX_ESTADO]).toUpperCase(Locale.ROOT) : "";
+            // ✅ estado cuota (col 10)
+            String est = str(r[10]).trim().toUpperCase(java.util.Locale.ROOT);
             g.put("todas", (int) g.get("todas") + 1);
-            if (est.equals("PAGADA"))
+            if ("PAGADA".equals(est))
                 g.put("pagadas", (int) g.get("pagadas") + 1);
 
-            // próximo vencimiento de cuotas NO pagadas
-            if (!est.equals("PAGADA") && idxSafe(r, IDX_VENC)) {
-                LocalDate venc = toDate(r[IDX_VENC]);
-                LocalDate actual = (LocalDate) g.get("proximoVenc");
+            // ✅ próximo vencimiento de NO pagadas (col 9)
+            if (!"PAGADA".equals(est)) {
+                java.time.LocalDate venc = toDate(r[9]);
+                java.time.LocalDate actual = (java.time.LocalDate) g.get("proximoVenc");
                 if (venc != null && (actual == null || venc.isBefore(actual))) {
                     g.put("proximoVenc", venc);
                 }
             }
         }
 
+        // ✅ estado general
         for (Map<String, Object> g : grouped.values()) {
             int pagadas = (int) g.get("pagadas");
             int total = (int) g.get("todas");
-            String estadoGeneral = (total > 0 && pagadas == total) ? "PAGADO" : (pagadas > 0) ? "PARCIAL" : "PENDIENTE";
+
+            String estadoGeneral = (total > 0 && pagadas == total) ? "PAGADO"
+                    : (pagadas > 0) ? "PARCIAL"
+                            : "PENDIENTE";
+
             g.put("estadoGeneral", estadoGeneral);
         }
 
         return new ArrayList<>(grouped.values());
     }
 
-    private static boolean idxSafe(Object[] r, int idx) {
-        return idx >= 0 && idx < r.length;
+    private Integer parseIdImpuesto(String codImp) {
+        // "IMP0014" -> 14
+        if (codImp == null)
+            return null;
+        String s = codImp.trim().toUpperCase(Locale.ROOT);
+        if (!s.startsWith("IMP"))
+            return null;
+        s = s.replace("IMP", "");
+        try {
+            return Integer.parseInt(s);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private static String str(Object o) {
         return o == null ? "" : String.valueOf(o);
     }
 
-    private static Integer toInt(Object o) {
+    private static int toInt(Object o) {
         if (o == null)
             return 0;
         if (o instanceof Number n)

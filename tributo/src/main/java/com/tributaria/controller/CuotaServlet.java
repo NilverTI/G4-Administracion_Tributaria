@@ -1,7 +1,6 @@
 package com.tributaria.controller;
 
 import com.tributaria.service.CuotaService;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -23,45 +22,68 @@ public class CuotaServlet extends HttpServlet {
 
         String action = request.getParameter("action");
 
-        // ✅ ENDPOINT JSON: detalle de cuotas por impuesto (para modal)
+        // ✅ JSON detalle cuotas (para modal)
+        // TU SP sp_listar_cuotas_por_impuesto devuelve: numero, vencimiento, monto, estado
         if ("detalle".equalsIgnoreCase(action)) {
             Integer idImpuesto = parseInt(request.getParameter("idImpuesto"));
-            if (idImpuesto == null) {
+            if (idImpuesto == null || idImpuesto <= 0) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.setContentType("application/json;charset=UTF-8");
                 response.getWriter().write("{\"error\":\"idImpuesto requerido\"}");
                 return;
             }
 
-            List<Object[]> cuotas = cuotaService.listarCuotasPorImpuesto(idImpuesto);
+            try {
+                List<Object[]> cuotas = cuotaService.listarCuotasPorImpuesto(idImpuesto);
 
-            response.setContentType("application/json;charset=UTF-8");
-            StringBuilder json = new StringBuilder("[");
-            for (int i = 0; i < cuotas.size(); i++) {
-                Object[] c = cuotas.get(i);
+                response.setContentType("application/json;charset=UTF-8");
 
-                // Esperado (ideal): 0=idCuota,1=numero,2=totalCuotas,3=monto,4=vencimiento,5=estado
-                json.append("{")
-                        .append("\"id\":").append(c[0]).append(",")
-                        .append("\"numero\":").append(c[1]).append(",")
-                        .append("\"total\":").append(c[2]).append(",")
-                        .append("\"monto\":\"").append(String.valueOf(c[3])).append("\",")
-                        .append("\"vencimiento\":\"").append(String.valueOf(c[4])).append("\",")
-                        .append("\"estado\":\"").append(escapeJson(String.valueOf(c[5]))).append("\"")
-                        .append("}");
+                int total = (cuotas == null) ? 0 : cuotas.size();
 
-                if (i < cuotas.size() - 1) json.append(",");
+                StringBuilder json = new StringBuilder("[");
+                if (cuotas != null) {
+                    for (int i = 0; i < cuotas.size(); i++) {
+                        Object[] c = cuotas.get(i);
+
+                        // c[0]=numero, c[1]=vencimiento, c[2]=monto, c[3]=estado
+                        String numero = safe(c, 0);
+                        String venc = safe(c, 1);
+                        String monto = safe(c, 2);
+                        String estado = safe(c, 3);
+
+                        json.append("{")
+                                .append("\"numero\":\"").append(escapeJson(numero)).append("\",")
+                                .append("\"total\":\"").append(total).append("\",")
+                                .append("\"monto\":\"").append(escapeJson(monto)).append("\",")
+                                .append("\"vencimiento\":\"").append(escapeJson(venc)).append("\",")
+                                .append("\"estado\":\"").append(escapeJson(estado)).append("\"")
+                                .append("}");
+
+                        if (i < cuotas.size() - 1) json.append(",");
+                    }
+                }
+                json.append("]");
+                response.getWriter().write(json.toString());
+                return;
+
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"error\":\"No se pudo cargar el detalle\"}");
+                return;
             }
-            json.append("]");
-            response.getWriter().write(json.toString());
-            return;
         }
 
-        // ✅ LISTA PRINCIPAL AGRUPADA (1 fila por impuesto fraccionado)
-        var lista = cuotaService.listarFraccionamientosAgrupados();
-        request.setAttribute("lista", lista);
+        // ✅ Lista principal (fraccionamientos agrupados)
+        try {
+            var lista = cuotaService.listarFraccionamientosAgrupados();
+            request.setAttribute("lista", lista);
+        } catch (Exception e) {
+            request.setAttribute("lista", List.of());
+            request.setAttribute("err", "No se pudo cargar la lista de fraccionamientos");
+        }
 
-        // ✅ COMBO: impuestos disponibles para fraccionar (SP)
+        // ✅ Combo impuestos
         try {
             List<Object[]> impuestos = cuotaService.listarImpuestosParaFraccionar();
             request.setAttribute("impuestos", impuestos);
@@ -89,7 +111,8 @@ public class CuotaServlet extends HttpServlet {
                 Integer numeroCuotas = parseInt(request.getParameter("numeroCuotas"));
                 String fechaStr = request.getParameter("fechaPrimeraCuota");
 
-                if (idImpuesto == null || numeroCuotas == null || fechaStr == null || fechaStr.trim().isEmpty()) {
+                if (idImpuesto == null || idImpuesto <= 0 || numeroCuotas == null || numeroCuotas <= 0
+                        || fechaStr == null || fechaStr.trim().isEmpty()) {
                     redirectMsg(response, request.getContextPath() + "/funcionario/cuota",
                             "err", "Completa todos los campos");
                     return;
@@ -105,7 +128,7 @@ public class CuotaServlet extends HttpServlet {
 
             } catch (Exception e) {
                 redirectMsg(response, request.getContextPath() + "/funcionario/cuota",
-                        "err", (e.getMessage() != null ? e.getMessage() : "Error al crear fraccionamiento"));
+                        "err", "Error al crear fraccionamiento");
                 return;
             }
         }
@@ -130,5 +153,10 @@ public class CuotaServlet extends HttpServlet {
     private String escapeJson(String s) {
         if (s == null) return "";
         return s.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
+    private String safe(Object[] arr, int idx) {
+        if (arr == null || idx < 0 || idx >= arr.length || arr[idx] == null) return "";
+        return String.valueOf(arr[idx]);
     }
 }

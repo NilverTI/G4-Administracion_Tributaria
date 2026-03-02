@@ -1,245 +1,264 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-    <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
-        <!DOCTYPE html>
-        <html lang="es">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Vehículos</title>
 
-        <head>
+  <!-- CSS GLOBAL -->
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dashboard.css">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/contribuyente.css">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/vehiculo.css">
 
-            <meta charset="UTF-8">
-            <title>Gestión de Vehículos</title>
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap">
 
-            <!-- CSS GLOBAL (el mismo que usan contribuyentes e inmuebles) -->
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dashboard.css">
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/contribuyente.css">
+  <!-- Iconos -->
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+</head>
 
-            <!-- Google Fonts -->
-            <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap"
-                rel="stylesheet">
+<body>
 
-            <!-- Iconos -->
-            <link rel="stylesheet"
-                href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+<%@ include file="/includes/sidebar.jsp" %>
 
-        </head>
+<main class="main">
+  <%@ include file="/includes/topbar.jsp" %>
 
-        <body>
+  <div class="content">
 
-            <!-- SIDEBAR -->
-            <%@ include file="/includes/sidebar.jsp" %>
+    <!-- HEADER -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Gestión de Vehículos</h1>
+        <p><c:out value="${empty cantidad ? 0 : cantidad}"/> vehículos registrados</p>
+      </div>
 
-                <main class="main">
+      <button class="btn-primary" id="btnNuevo" type="button">
+        <i class="fi fi-rr-plus"></i> Registrar Vehículo
+      </button>
+    </div>
 
-                    <!-- TOPBAR -->
-                    <%@ include file="/includes/topbar.jsp" %>
+    <!-- MENSAJES -->
+    <c:if test="${not empty err}">
+      <div class="alert alert-error" style="margin-bottom:14px;">
+        <i class="fi fi-rr-triangle-warning"></i>
+        <span><c:out value="${err}"/></span>
+      </div>
+    </c:if>
 
-                        <div class="content">
+    <c:if test="${not empty ok}">
+      <div class="alert alert-success" style="margin-bottom:14px;">
+        <i class="fi fi-rr-check"></i>
+        <span><c:out value="${ok}"/></span>
+      </div>
+    </c:if>
 
-                            <!-- Encabezado -->
-                            <div class="page-header">
-                                <div class="page-header-left">
-                                    <h1>Gestión de Vehículos</h1>
-                                    <p>
-                                        <c:out value="${cantidad}" /> vehículos registrados
-                                    </p>
-                                </div>
+    <!-- FILTROS -->
+    <div class="filter-bar">
+      <div class="filter-search">
+        <i class="fi fi-rr-search"></i>
+        <input type="text" id="tableSearch" placeholder="Buscar por placa, marca o contribuyente...">
+      </div>
 
-                                <button class="btn-primary" id="btnNuevo">
-                                    <i class="fi fi-rr-plus"></i> Registrar Vehículo
-                                </button>
-                            </div>
+      <div class="filter-select">
+        <i class="fi fi-rr-filter"></i>
+        <select id="estadoFilter">
+          <option value="">Todos</option>
+          <option value="ACTIVO">Activo</option>
+          <option value="INACTIVO">Inactivo</option>
+        </select>
+      </div>
+    </div>
 
-                            <!-- Barra de búsqueda -->
-                            <div class="filter-bar">
+    <!-- TABLA -->
+    <div class="table-card">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Placa</th>
+            <th>Contribuyente</th>
+            <th>Vehículo</th>
+            <th>Año</th>
+            <th>Valor</th>
+            <th>Estado</th>
+            <th>Registro</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
 
-                                <div class="filter-search">
-                                    <i class="fi fi-rr-search"></i>
-                                    <input type="text" id="tableSearch"
-                                        placeholder="Buscar por placa, marca o contribuyente...">
-                                </div>
+        <tbody id="tableBody">
+          <c:forEach var="v" items="${lista}">
+            <tr data-estado="${v[9]}">
+              <td><c:out value="${v[0]}"/></td>
 
-                                <div class="filter-select">
-                                    <i class="fi fi-rr-filter"></i>
-                                    <select id="estadoFilter">
-                                        <option value="">Todos</option>
-                                        <option value="ACTIVO">Activo</option>
-                                        <option value="INACTIVO">Inactivo</option>
-                                    </select>
-                                </div>
+              <td style="font-family:'JetBrains Mono', monospace; font-weight:700;">
+                <c:out value="${v[1]}"/>
+              </td>
 
-                            </div>
+              <td><c:out value="${v[2]}"/></td>
+              <td><c:out value="${v[3]}"/></td>
+              <td><c:out value="${v[4]}"/></td>
 
-                            <!-- Tabla -->
-                            <div class="table-card">
-                                <table class="data-table">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Placa</th>
-                                            <th>Contribuyente</th>
-                                            <th>Vehículo</th>
-                                            <th>Año</th>
-                                            <th>Valor</th>
-                                            <th>Estado</th>
-                                            <th>Registro</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
+              <td class="td-money">
+                S/ <fmt:formatNumber value="${v[5]}" type="number" minFractionDigits="2" maxFractionDigits="2"/>
+              </td>
 
-                                    <tbody id="tableBody">
+              <td>
+                <c:choose>
+                  <c:when test="${v[9] == 'ACTIVO'}">
+                    <span class="badge badge-activo">Activo</span>
+                  </c:when>
+                  <c:otherwise>
+                    <span class="badge badge-inactivo">Inactivo</span>
+                  </c:otherwise>
+                </c:choose>
+              </td>
 
-                                        <c:forEach var="v" items="${lista}">
-                                            <tr data-estado="${v[9]}">
+              <td>
+                <fmt:formatDate value="${v[10]}" pattern="dd MMM yyyy"/>
+              </td>
 
-                                                <!-- ID -->
-                                                <td>${v[0]}</td>
+              <td>
+                <c:choose>
+                  <c:when test="${v[9] == 'ACTIVO'}">
+                    <a class="toggle-btn activo"
+                       href="${pageContext.request.contextPath}/funcionario/vehiculo?action=estado&id=${v[0]}&estado=INACTIVO"
+                       title="Desactivar">
+                      <i class="fi fi-rr-toggle-on"></i>
+                    </a>
+                  </c:when>
+                  <c:otherwise>
+                    <a class="toggle-btn inactivo"
+                       href="${pageContext.request.contextPath}/funcionario/vehiculo?action=estado&id=${v[0]}&estado=ACTIVO"
+                       title="Activar">
+                      <i class="fi fi-rr-toggle-off"></i>
+                    </a>
+                  </c:otherwise>
+                </c:choose>
+              </td>
+            </tr>
+          </c:forEach>
 
-                                                <!-- PLACA -->
-                                                <td>${v[1]}</td>
+          <c:if test="${empty lista}">
+            <tr>
+              <td colspan="9" style="padding:18px 20px; text-align:center; color: var(--text-muted);">
+                No hay vehículos registrados
+              </td>
+            </tr>
+          </c:if>
+        </tbody>
+      </table>
 
-                                                <!-- CONTRIBUYENTE -->
-                                                <td>${v[2]}</td>
+      <div class="table-footer">
+        <div class="table-info" id="tableInfo">Mostrando 0 de 0</div>
+        <div id="pagination"></div>
+      </div>
+    </div>
 
-                                                <!-- VEHÍCULO -->
-                                                <td>${v[3]}</td>
+  </div>
+</main>
 
-                                                <!-- AÑO -->
-                                                <td>${v[4]}</td>
+<!-- ========================= MODAL ============================= -->
+<div class="modal-overlay" id="modalOverlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true">
 
-                                                <!-- VALOR -->
-                                                <td>S/
-                                                    <fmt:formatNumber value="${v[5]}" type="number"
-                                                        maxFractionDigits="0" />
-                                                </td>
+    <div class="modal-header">
+      <h2>Registrar Vehículo</h2>
+      <button type="button" class="modal-close" id="modalClose" title="Cerrar">
+        <i class="fi fi-rr-cross-small"></i>
+      </button>
+    </div>
 
-                                                <!-- ESTADO (v[9]) -->
-                                                <td>
-                                                    <c:choose>
-                                                        <c:when test="${v[9] == 'ACTIVO'}">
-                                                            <span class="badge badge-activo">Activo</span>
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <span class="badge badge-inactivo">Inactivo</span>
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </td>
+    <form id="vehiculoForm" method="post" action="${pageContext.request.contextPath}/funcionario/vehiculo">
+      <input type="hidden" name="action" value="crear">
 
-                                                <!-- REGISTRO (v[10]) -->
-                                                <td>
-                                                    <fmt:formatDate value="${v[10]}" pattern="d MMM yyyy" />
-                                                </td>
+      <div class="form-grid">
 
-                                                <!-- ACCIONES -->
-                                                <td>
-                                                    <c:choose>
-                                                        <c:when test="${v[9] == 'ACTIVO'}">
-                                                            <a class="toggle-btn activo"
-                                                                href="${pageContext.request.contextPath}/funcionario/vehiculo?action=estado&id=${v[0]}&estado=INACTIVO">
-                                                                <i class="fi fi-rr-toggle-on"></i>
-                                                            </a>
-                                                        </c:when>
+        <!-- CONTRIBUYENTE BUSCABLE -->
+        <div class="form-group full">
+          <label class="form-label">Contribuyente</label>
 
-                                                        <c:otherwise>
-                                                            <a class="toggle-btn inactivo"
-                                                                href="${pageContext.request.contextPath}/funcionario/vehiculo?action=estado&id=${v[0]}&estado=ACTIVO">
-                                                                <i class="fi fi-rr-toggle-off"></i>
-                                                            </a>
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </td>
+          <div class="cselect" id="csContribuyente">
+            <div class="cselect-control">
+              <input
+                type="text"
+                class="form-input cselect-input"
+                id="contribuyenteInput"
+                placeholder="Buscar contribuyente..."
+                autocomplete="off"
+              />
+              <button type="button" class="cselect-btn" id="contribuyenteToggle" aria-label="Abrir">
+                <i class="fi fi-rr-angle-small-down"></i>
+              </button>
+            </div>
 
-                                            </tr>
-                                        </c:forEach>
+            <div class="cselect-menu" id="contribuyenteMenu" role="listbox" aria-hidden="true"></div>
+          </div>
 
-                                    </tbody>
-                                </table>
+          <!-- valor real -->
+          <input type="hidden" name="idContribuyente" id="idContribuyente" required>
 
-                                <div id="pagination"></div>
-                            </div>
+          <!-- dataset escondido -->
+          <div id="contribuyentesData" style="display:none;">
+            <c:forEach var="c" items="${contribuyentes}">
+              <span class="contrib-item" data-id="${c[0]}"><c:out value="${c[1]}"/></span>
+            </c:forEach>
+          </div>
 
-                        </div>
+          <small class="hint" id="contribuyenteHint">Escribe para buscar y selecciona uno.</small>
+        </div>
 
-                </main>
+        <div class="form-group">
+          <label class="form-label">Placa</label>
+          <input type="text" name="placa" class="form-input" maxlength="15" required>
+        </div>
 
+        <div class="form-group">
+          <label class="form-label">Marca</label>
+          <input type="text" name="marca" class="form-input" required>
+        </div>
 
-                <!-- ========================= MODAL ============================= -->
-                <div class="modal-overlay" id="modalOverlay">
+        <div class="form-group">
+          <label class="form-label">Modelo</label>
+          <input type="text" name="modelo" class="form-input" required>
+        </div>
 
-                    <div class="modal">
+        <div class="form-group">
+          <label class="form-label">Año</label>
+          <input type="number" name="anio" class="form-input" min="1900" max="2100" required>
+        </div>
 
-                        <div class="modal-header">
-                            <h2>Registrar Vehículo</h2>
-                            <button type="button" class="modal-close" id="modalClose">
-                                <i class="fi fi-rr-cross-small"></i>
-                            </button>
-                        </div>
+        <div class="form-group">
+          <label class="form-label">Fecha de Inscripción</label>
+          <input type="date" name="fechaInscripcion" class="form-input" required>
+        </div>
 
-                        <form method="post" action="${pageContext.request.contextPath}/funcionario/vehiculo">
+        <div class="form-group full">
+          <label class="form-label">Valor</label>
+          <input type="number" step="0.01" name="valor" class="form-input" required>
+        </div>
 
-                            <input type="hidden" name="action" value="crear">
+      </div>
 
-                            <div class="form-grid">
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="modalCancel">Cancelar</button>
+        <button type="submit" class="btn-primary">
+          <i class="fi fi-rr-disk"></i> Guardar
+        </button>
+      </div>
+    </form>
 
-                                <div class="form-group">
-                                    <label class="form-label">Contribuyente</label>
-                                    <select name="idContribuyente" class="form-input" required>
-                                        <c:forEach var="c" items="${contribuyentes}">
-                                            <option value="${c[0]}">${c[1]}</option>
-                                        </c:forEach>
-                                    </select>
-                                </div>
+  </div>
+</div>
 
-                                <div class="form-group">
-                                    <label class="form-label">Placa</label>
-                                    <input type="text" name="placa" class="form-input" required>
-                                </div>
+<!-- JS -->
+<script src="${pageContext.request.contextPath}/js/pagination.js"></script>
+<script src="${pageContext.request.contextPath}/js/vehiculo.js?v=4"></script>
 
-                                <div class="form-group">
-                                    <label class="form-label">Marca</label>
-                                    <input type="text" name="marca" class="form-input" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">Modelo</label>
-                                    <input type="text" name="modelo" class="form-input" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">Año</label>
-                                    <input type="number" name="anio" class="form-input" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">Fecha de Inscripción</label>
-                                    <input type="date" name="fechaInscripcion" class="form-input" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">Valor</label>
-                                    <input type="number" step="0.01" name="valor" class="form-input" required>
-                                </div>
-
-                            </div>
-
-                            <div class="modal-footer">
-                                <button type="button" class="btn-secondary" id="modalCancel">Cancelar</button>
-                                <button type="submit" class="btn-primary">
-                                    <i class="fi fi-rr-disk"></i> Guardar
-                                </button>
-                            </div>
-
-                        </form>
-
-                    </div>
-
-                </div>
-
-
-                <!-- JS -->
-                <script src="${pageContext.request.contextPath}/js/contribuyente.js"></script>
-                <script src="${pageContext.request.contextPath}/js/paginacion.js"></script>
-
-        </body>
-
-        </html>
+</body>
+</html>

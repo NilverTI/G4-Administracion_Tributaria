@@ -1,0 +1,206 @@
+/* ===========================
+   CUOTA.CSS (LIMPIO + PRO)
+   - Mantiene tu estilo actual
+   - Corrige duplicados
+   - Mejora el modal y el select buscable (cselect)
+   =========================== */
+
+/* ---------- Textos auxiliares ---------- */
+.page-subtitle {
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+/* ---------- Tabla vacía / mensajes ---------- */
+.empty-table {
+  text-align: center;
+  padding: 20px;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* ---------- Badges ---------- */
+.badge-pendiente {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+/* ---------- Evitar subrayado en botones/links ---------- */
+.btn-primary {
+  text-decoration: none;
+}
+.btn-primary:hover {
+  text-decoration: none;
+}
+
+/* ---------- Modal overlay (tu lógica) ---------- */
+.modal-overlay {
+  display: none;
+}
+.modal-overlay.open {
+  display: flex;
+}
+
+/* ===========================
+   MEJORAS VISUALES MODAL
+   (sin romper tus clases globales)
+   =========================== */
+
+.modal-overlay.open {
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(15, 23, 42, 0.48); /* oscuro suave */
+  backdrop-filter: blur(3px);
+}
+
+.modal {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 22px 70px rgba(2, 6, 23, 0.25);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.modal-header {
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.modal-footer {
+  border-top: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+/* Botón cerrar */
+.modal-close {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.12s ease;
+}
+.modal-close:hover {
+  background: #e2e8f0;
+}
+.modal-close:active {
+  transform: translateY(1px);
+}
+
+/* ===========================
+   CUSTOM SELECT BUSCABLE (.cselect)
+   =========================== */
+
+.cselect {
+  position: relative;
+  width: 100%;
+}
+
+/* Control */
+.cselect-control {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Input */
+.cselect-input {
+  flex: 1;
+}
+
+/* Botón toggle */
+.cselect-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+.cselect-btn:hover {
+  background: #f8fafc;
+}
+
+/* Dropdown */
+.cselect-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 8px);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  padding: 6px;
+  display: none;
+  z-index: 999;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+/* Mostrar */
+.cselect-menu.open {
+  display: block;
+}
+
+/* ITEM */
+.cselect-item {
+  all: unset; /* 🔥 elimina estilos heredados de button */
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #0f172a;
+  transition: background .15s ease;
+}
+
+.cselect-item:hover {
+  background: #f1f5f9;
+}
+
+/* Item seleccionado */
+.cselect-item.active {
+  background: #e2e8f0;
+  font-weight: 600;
+}
+
+/* Sin resultados */
+.cselect-empty {
+  padding: 10px 14px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+/* Scroll bonito */
+.cselect-menu::-webkit-scrollbar {
+  width: 8px;
+}
+
+.cselect-menu::-webkit-scrollbar-thumb {
+  background: rgba(100,116,139,.4);
+  border-radius: 10px;
+}
+/* ===========================
+   RESPONSIVE (MODAL)
+   =========================== */
+@media (max-width: 520px) {
+  .cselect-control {
+    gap: 8px;
+  }
+  .cselect-btn {
+    width: 44px;
+    height: 44px;
+  }
+}

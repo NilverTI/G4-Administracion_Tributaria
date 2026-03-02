@@ -1,184 +1,285 @@
-
 (() => {
+  "use strict";
+
+  const CTX = (typeof CONTEXT_PATH !== "undefined") ? CONTEXT_PATH : "";
   const $ = (id) => document.getElementById(id);
-  const btnOpen = $("btnFraccionamiento");
-  const modal = $("modalFraccionamiento");
-  const btnClose = $("closeFraccionamiento");
-  const btnCancel = $("cancelFraccionamiento");
 
-  function openModal() {
-    if (!modal) return;
-    modal.classList.add("open");
-    const first = modal.querySelector("select, input, button, textarea");
-    if (first) first.focus();
+  // =========================
+  // Modal helpers
+  // =========================
+  function openModal(overlay) {
+    if (!overlay) return;
+    overlay.classList.add("open");
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
   }
 
-  function closeModal() {
-    if (!modal) return;
-    modal.classList.remove("open");
-    const form = modal.querySelector("form");
-    if (form) form.reset();
+  function closeModal(overlay) {
+    if (!overlay) return;
+    overlay.classList.remove("open");
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
   }
 
-  btnOpen?.addEventListener("click", openModal);
-  btnClose?.addEventListener("click", closeModal);
-  btnCancel?.addEventListener("click", closeModal);
+  function isOpen(overlay) {
+    return !!overlay && overlay.classList.contains("open");
+  }
 
-  modal?.addEventListener("click", (e) => {
-    if (e.target === modal) closeModal();
-  });
+  function bindModalClose(overlay, closeBtn, cancelBtn) {
+    closeBtn?.addEventListener("click", () => closeModal(overlay));
+    cancelBtn?.addEventListener("click", () => closeModal(overlay));
 
-  const search = $("tableSearch");
-  const estadoFilter = $("estadoFilter");
-  const tbody = $("tableBody");
-
-  function applyFilter() {
-    if (!tbody) return;
-
-    const q = (search?.value || "").trim().toLowerCase();
-    const est = (estadoFilter?.value || "").trim().toUpperCase();
-
-    const rows = Array.from(tbody.querySelectorAll("tr"));
-
-    rows.forEach((tr) => {
-      if (tr.querySelector("td[colspan]")) return;
-
-      const rowText = tr.innerText.toLowerCase();
-      const rowEstado = (tr.getAttribute("data-estado") || "").toUpperCase();
-
-      const okText = !q || rowText.includes(q);
-      const okEstado = !est || rowEstado === est;
-
-      tr.style.display = okText && okEstado ? "" : "none";
+    // click en overlay (fuera del modal)
+    overlay?.addEventListener("click", (e) => {
+      if (e.target === overlay) closeModal(overlay);
     });
   }
 
-  search?.addEventListener("input", applyFilter);
-  estadoFilter?.addEventListener("change", applyFilter);
-
-  const modalDetalle = $("modalDetalleCuotas");
-  const closeDetalle = $("closeDetalleCuotas");
-  const cancelDetalle = $("cancelDetalleCuotas");
-  const detalleBody = $("detalleCuotasBody");
-  const detalleSubtitle = $("detalleSubtitle");
-
-  function openDetalleModal() {
-    if (!modalDetalle) return;
-    modalDetalle.classList.add("open");
+  // =========================
+  // Utils
+  // =========================
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
   }
 
-  function closeDetalleModal() {
-    if (!modalDetalle) return;
-    modalDetalle.classList.remove("open");
-    if (detalleBody) {
-      detalleBody.innerHTML = `
-        <tr>
-          <td colspan="4" class="empty-table">Seleccione un fraccionamiento...</td>
-        </tr>`;
+  function estadoBadgeHtml(estado) {
+    const up = String(estado || "").trim().toUpperCase();
+
+    if (up === "PAGADA" || up === "PAGADO") {
+      return `<span class="badge badge-activo">Pagado</span>`;
     }
-    if (detalleSubtitle) detalleSubtitle.textContent = "";
-  }
-
-  closeDetalle?.addEventListener("click", closeDetalleModal);
-  cancelDetalle?.addEventListener("click", closeDetalleModal);
-
-  modalDetalle?.addEventListener("click", (e) => {
-    if (e.target === modalDetalle) closeDetalleModal();
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key !== "Escape") return;
-    if (modal?.classList.contains("open")) closeModal();
-    if (modalDetalle?.classList.contains("open")) closeDetalleModal();
-  });
-
-  function badgeHTML(estadoRaw) {
-    const est = (estadoRaw || "").toString().trim().toUpperCase();
-
-    if (est === "PAGADO" || est === "PAGADA") {
-      return `<span class="badge badge-activo">Pagada</span>`;
-    }
-    if (est === "VENCIDO" || est === "VENCIDA") {
-      return `<span class="badge badge-inactivo">Vencida</span>`;
+    if (up.includes("VENC")) {
+      return `<span class="badge badge-inactivo">Vencido</span>`;
     }
     return `<span class="badge badge-pendiente">Pendiente</span>`;
   }
 
-  async function cargarDetalleCuotas({ idImpuesto, codigoImpuesto, contribuyente }) {
-    const ctx = window.__CTX__ || "";
-    const url = `${ctx}/funcionario/cuota?action=detalle&idImpuesto=${encodeURIComponent(idImpuesto)}`;
+  // =========================
+  // CSelect Pro (Impuesto)
+  // =========================
+  function initImpuestoSelect() {
+    const root = $("csImpuesto");
+    const displayBtn = $("impuestoDisplay");
+    const displayText = $("impuestoDisplayText");
+    const dropdown = $("impuestoDropdown");
+    const input = $("impuestoInput");
+    const menu = $("impuestoMenu");
+    const hidden = $("idImpuesto");
+    const dataBox = $("impuestosData");
 
-    if (detalleSubtitle) {
-      detalleSubtitle.textContent = `${codigoImpuesto || ""} — ${contribuyente || ""}`.trim();
+    if (!root || !displayBtn || !displayText || !dropdown || !input || !menu || !hidden || !dataBox) return;
+
+    const items = Array.from(dataBox.querySelectorAll(".imp-item")).map((el) => {
+      const label = el.dataset.label || "";
+      return {
+        id: el.dataset.id || "",
+        label,
+        search: label.toLowerCase(),
+      };
+    });
+
+    function openDropdown() {
+      dropdown.classList.add("open");
+      dropdown.setAttribute("aria-hidden", "false");
+      displayBtn.setAttribute("aria-expanded", "true");
+      input.focus();
     }
 
-    if (detalleBody) {
-      detalleBody.innerHTML = `
-        <tr>
-          <td colspan="4" class="empty-table">Cargando...</td>
-        </tr>`;
+    function closeDropdown() {
+      dropdown.classList.remove("open");
+      dropdown.setAttribute("aria-hidden", "true");
+      displayBtn.setAttribute("aria-expanded", "false");
     }
 
-    try {
-      const res = await fetch(url, { headers: { "Accept": "application/json" } });
-
-      if (!res.ok) {
-        if (detalleBody) {
-          detalleBody.innerHTML = `
-            <tr>
-              <td colspan="4" class="empty-table">Error al cargar (HTTP ${res.status})</td>
-            </tr>`;
-        }
+    function render(list, activeId = "") {
+      if (!list || list.length === 0) {
+        menu.innerHTML = `<div class="cselect-empty">Sin resultados</div>`;
         return;
       }
+
+      menu.innerHTML = list.slice(0, 200).map((it) => {
+        const active = String(it.id) === String(activeId) ? "active" : "";
+        return `
+          <button type="button" class="cselect-option ${active}" data-id="${escapeHtml(it.id)}">
+            ${escapeHtml(it.label)}
+          </button>
+        `;
+      }).join("");
+
+      menu.querySelectorAll(".cselect-option").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.id;
+          const label = btn.textContent.trim();
+
+          hidden.value = id;
+          displayText.textContent = label;
+          displayText.classList.remove("is-placeholder");
+
+          input.value = "";
+          closeDropdown();
+        });
+      });
+    }
+
+    // init
+    displayText.classList.add("is-placeholder");
+    render(items, hidden.value);
+
+    // toggle click
+    displayBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (dropdown.classList.contains("open")) closeDropdown();
+      else {
+        render(items, hidden.value);
+        openDropdown();
+      }
+    });
+
+    // buscar
+    input.addEventListener("input", () => {
+      const q = input.value.trim().toLowerCase();
+      const filtered = q ? items.filter((x) => x.search.includes(q)) : items;
+      render(filtered, hidden.value);
+    });
+
+    // click fuera
+    document.addEventListener("click", (e) => {
+      if (!root.contains(e.target)) closeDropdown();
+    });
+
+    // teclado
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const first = menu.querySelector(".cselect-option");
+        if (first) first.click();
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeDropdown();
+      }
+    });
+  }
+
+  // =========================
+  // Detalle cuotas
+  // =========================
+  async function cargarDetalleCuotas(idImpuesto, meta) {
+    const tbody = $("detalleCuotasBody");
+    const subtitle = $("detalleSubtitle");
+
+    if (subtitle) {
+      const parts = [];
+      if (meta?.codigo) parts.push(`<b>${escapeHtml(meta.codigo)}</b>`);
+      if (meta?.contribuyente) parts.push(escapeHtml(meta.contribuyente));
+      if (meta?.tipo || meta?.anio) parts.push(`(${escapeHtml(meta.tipo || "")} ${escapeHtml(meta.anio || "")})`);
+      subtitle.innerHTML = parts.join(" — ");
+    }
+
+    if (!tbody) return;
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" class="empty-table">Cargando...</td>
+      </tr>
+    `;
+
+    try {
+      const url = `${CTX}/funcionario/cuota?action=detalle&idImpuesto=${encodeURIComponent(idImpuesto)}`;
+      const res = await fetch(url, { headers: { "Accept": "application/json" } });
+
+      if (!res.ok) throw new Error("HTTP " + res.status);
 
       const data = await res.json();
 
       if (!Array.isArray(data) || data.length === 0) {
-        if (detalleBody) {
-          detalleBody.innerHTML = `
-            <tr>
-              <td colspan="4" class="empty-table">No hay cuotas para este impuesto</td>
-            </tr>`;
-        }
+        tbody.innerHTML = `
+          <tr><td colspan="4" class="empty-table">No hay cuotas para este impuesto</td></tr>
+        `;
         return;
       }
-      const html = data.map((c) => {
-        const cuotaTxt = `${c.numero}/${c.total}`;
+
+      tbody.innerHTML = data.map((c) => {
+        const numero = c?.numero ?? "";
+        const total = c?.total ?? "";
+        const monto = c?.monto ?? "";
+        const venc = c?.vencimiento ?? "";
+        const estado = c?.estado ?? "";
+
         return `
           <tr>
-            <td class="td-code">${cuotaTxt}</td>
-            <td class="td-money">S/ ${c.monto}</td>
-            <td>${c.vencimiento}</td>
-            <td>${badgeHTML(c.estado)}</td>
+            <td>${escapeHtml(numero)} / ${escapeHtml(total)}</td>
+            <td class="td-money">S/ ${escapeHtml(monto)}</td>
+            <td>${escapeHtml(venc)}</td>
+            <td>${estadoBadgeHtml(estado)}</td>
           </tr>
         `;
       }).join("");
 
-      if (detalleBody) detalleBody.innerHTML = html;
-
     } catch (err) {
-      if (detalleBody) {
-        detalleBody.innerHTML = `
-          <tr>
-            <td colspan="4" class="empty-table">Error de red al cargar cuotas</td>
-          </tr>`;
-      }
+      tbody.innerHTML = `
+        <tr><td colspan="4" class="empty-table">Error cargando cuotas</td></tr>
+      `;
     }
   }
 
-  document.addEventListener("click", (e) => {
-    const btn = e.target.closest(".btn-ver-cuotas");
-    if (!btn) return;
+  // =========================
+  // Init
+  // =========================
+  document.addEventListener("DOMContentLoaded", () => {
+    // Modales
+    const modalFrac = $("modalFraccionamiento");
+    const btnFrac = $("btnFraccionamiento");
+    const closeFrac = $("closeFraccionamiento");
+    const cancelFrac = $("cancelFraccionamiento");
 
-    const idImpuesto = btn.getAttribute("data-id-impuesto");
-    const codigoImpuesto = btn.getAttribute("data-cod-impuesto") || "";
-    const contribuyente = btn.getAttribute("data-contribuyente") || "";
+    const modalDetalle = $("modalDetalleCuotas");
+    const closeDetalle = $("closeDetalleCuotas");
+    const cancelDetalle = $("cancelDetalleCuotas");
 
-    if (!idImpuesto) return;
+    // Abrir modal fraccionamiento
+    btnFrac?.addEventListener("click", () => openModal(modalFrac));
+    bindModalClose(modalFrac, closeFrac, cancelFrac);
+    bindModalClose(modalDetalle, closeDetalle, cancelDetalle);
 
-    openDetalleModal();
-    cargarDetalleCuotas({ idImpuesto, codigoImpuesto, contribuyente });
+    // ESC cierra el que esté abierto
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      if (isOpen(modalDetalle)) closeModal(modalDetalle);
+      if (isOpen(modalFrac)) closeModal(modalFrac);
+    });
+
+    // Select Pro
+    initImpuestoSelect();
+
+    // Delegación: Ver cuotas (funciona con paginación)
+    document.addEventListener("click", async (e) => {
+      const btn = e.target.closest(".btn-ver-cuotas");
+      if (!btn) return;
+
+      const idImpuesto = btn.dataset.idImpuesto;
+      if (!idImpuesto || Number(idImpuesto) <= 0) {
+        alert("No se pudo identificar el impuesto (ID inválido).");
+        return;
+      }
+
+      const meta = {
+        codigo: btn.dataset.codImpuesto || "",
+        contribuyente: btn.dataset.contribuyente || "",
+        tipo: btn.dataset.tipo || "",
+        anio: btn.dataset.anio || "",
+      };
+
+      openModal(modalDetalle);
+      await cargarDetalleCuotas(idImpuesto, meta);
+    });
   });
 
 })();
