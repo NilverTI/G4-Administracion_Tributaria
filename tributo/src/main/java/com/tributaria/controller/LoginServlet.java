@@ -9,41 +9,15 @@ import jakarta.servlet.http.*;
 
 import java.io.IOException;
 
-@WebServlet({"/login", "/logout"})
+@WebServlet("/login")
 public class LoginServlet extends HttpServlet {
 
-    private final UsuarioService usuarioService = new UsuarioService();
+    private UsuarioService usuarioService = new UsuarioService();
 
     @Override
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response)
             throws ServletException, IOException {
-
-        String path = request.getServletPath();
-
-        // 🔴 LOGOUT
-        if ("/logout".equals(path)) {
-
-            HttpSession session = request.getSession(false);
-            if (session != null) {
-                session.invalidate();
-            }
-
-            // ✅ Anti-cache (evita volver con el botón atrás)
-            response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-            response.setHeader("Pragma", "no-cache");
-            response.setDateHeader("Expires", 0);
-
-            // ✅ Redirección limpia al servlet /login
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
-        // 🟢 LOGIN (GET)
-        // ✅ Anti-cache también para la vista login
-        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-        response.setHeader("Pragma", "no-cache");
-        response.setDateHeader("Expires", 0);
 
         request.getRequestDispatcher("/views/auth/login.jsp")
                .forward(request, response);
@@ -54,42 +28,56 @@ public class LoginServlet extends HttpServlet {
                           HttpServletResponse response)
             throws ServletException, IOException {
 
+        // 1️⃣ Obtener datos del formulario
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
+        // 2️⃣ Autenticar usuario
         Usuario usuario = usuarioService.autenticar(username, password);
 
         if (usuario != null) {
 
+            // 3️⃣ Crear sesión
             HttpSession session = request.getSession(true);
             session.setAttribute("usuario", usuario);
-            session.setMaxInactiveInterval(20 * 60);
+            session.setMaxInactiveInterval(20 * 60); // 20 minutos
 
-            String nombreRol = (usuario.getRol() != null) ? usuario.getRol().getNombre() : "";
+            // 4️⃣ Obtener nombre del rol
+            String nombreRol = usuario.getRol().getNombre();
 
-            if ("ADMIN".equalsIgnoreCase(nombreRol) || "FUNCIONARIO".equalsIgnoreCase(nombreRol)) {
+            // 5️⃣ Redirigir según rol
+            if ("ADMIN".equalsIgnoreCase(nombreRol)
+                    || "FUNCIONARIO".equalsIgnoreCase(nombreRol)) {
 
-                response.sendRedirect(request.getContextPath() + "/funcionario/dashboard");
-                return;
+                response.sendRedirect(
+                        request.getContextPath()
+                                + "/funcionario/dashboard"
+                );
 
             } else if ("CONTRIBUYENTE".equalsIgnoreCase(nombreRol)) {
 
-                // Mejor práctica: redirigir a un servlet, pero si tu vista es directa lo dejamos así
-                response.sendRedirect(request.getContextPath() + "/views/contribuyente/dashboard/index.jsp");
-                return;
+                response.sendRedirect(
+                        request.getContextPath()
+                                + "/contribuyente/dashboard"
+                );
 
             } else {
+                // Rol desconocido → cerrar sesión por seguridad
                 session.invalidate();
-                response.sendRedirect(request.getContextPath() + "/login");
-                return;
+                response.sendRedirect(
+                        request.getContextPath()
+                                + "/views/auth/login.jsp"
+                );
             }
 
         } else {
 
+            // 6️⃣ Credenciales incorrectas
             request.setAttribute("error", "Usuario o contraseña incorrectos");
 
-            request.getRequestDispatcher("/views/auth/login.jsp")
-                   .forward(request, response);
+            request.getRequestDispatcher(
+                    "/views/auth/login.jsp"
+            ).forward(request, response);
         }
     }
 }

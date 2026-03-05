@@ -1,297 +1,556 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SAT Municipal - Gestión de Cuotas</title>
+    <meta charset="UTF-8">
+    <title>Cuotas y Pagos</title>
 
-  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dashboard.css">
-  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/layout.css">
-  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/contribuyente.css">
-  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/cuota.css?v=4">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dashboard.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/contribuyente.css?v=20260303-5">
+    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
 
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+    <style>
+        .tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: .2s;
+        }
+
+        .tab-btn.active {
+            background: var(--navy);
+            color: #fff;
+            border-color: var(--navy);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeUp .25s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .tab-header p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .tab-header-actions {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        .type-filter {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .type-filter select {
+            border: none;
+            outline: none;
+            background: transparent;
+            font-family: 'Sora', sans-serif;
+            color: var(--text);
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .tab-search {
+            min-width: 280px;
+        }
+
+        .table-card-scroll {
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+
+        .table-wide {
+            min-width: 1220px;
+        }
+
+        .table-wide th,
+        .table-wide td {
+            white-space: nowrap;
+        }
+
+        .table-wide td:nth-child(4) {
+            white-space: normal;
+            min-width: 190px;
+        }
+
+        .alert {
+            border-radius: 12px;
+            padding: 11px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 14px;
+            border: 1px solid transparent;
+        }
+
+        .alert-ok {
+            background: #ecfdf3;
+            color: #166534;
+            border-color: #bbf7d0;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            color: #991b1b;
+            border-color: #fecaca;
+        }
+
+        .badge-fraccionado {
+            background: #e0f2fe;
+            color: #075985;
+        }
+
+        .badge-cerrado {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-historico {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .helper-mono {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .action-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .action-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: .2s;
+        }
+
+        .action-icon:hover {
+            border-color: #cbd5e1;
+            color: var(--text);
+            background: #f8fafc;
+        }
+
+        .action-icon.primary:hover {
+            border-color: #bfdbfe;
+            color: #1d4ed8;
+            background: #eff6ff;
+        }
+
+        .btn-toggle-history {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: .2s;
+        }
+
+        .btn-toggle-history:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+        }
+
+        @media (max-width: 880px) {
+            .tab-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .tab-header-actions {
+                width: 100%;
+                justify-content: flex-start;
+                margin-left: 0;
+            }
+
+            .tab-search {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
 </head>
 
 <body>
-
-<%@ include file="/includes/sidebar.jsp" %>
+<jsp:include page="/includes/sidebar.jsp" />
 
 <main class="main">
-  <%@ include file="/includes/topbar.jsp" %>
+    <jsp:include page="/includes/topbar.jsp" />
 
-  <section class="content">
+    <div class="content">
 
-    <div class="page-header">
-      <div class="page-header-left">
-        <h1>Gestión de Cuotas</h1>
-        <p>${empty lista ? 0 : lista.size()} fraccionamientos registrados</p>
-      </div>
+        <div class="page-header">
+            <div class="page-header-left">
+                <h1>Gestion de Cuotas y Pagos</h1>
+                <p>Fracciona impuestos activos y registra el pago de cada cuota.</p>
+            </div>
 
-      <button class="btn-primary" id="btnFraccionamiento" type="button">
-        <i class="fi fi-rr-plus"></i> Crear Fraccionamiento
-      </button>
-    </div>
+            <a href="${pageContext.request.contextPath}/funcionario/cuotas?action=crear" class="btn-primary">
+                <i class="fi fi-rr-plus"></i> Crear Cuotas
+            </a>
+        </div>
 
-    <c:if test="${not empty err}">
-      <div class="alert alert-error" style="margin-bottom:14px;">
-        <i class="fi fi-rr-triangle-warning"></i>
-        <span><c:out value="${err}"/></span>
-      </div>
-    </c:if>
+        <c:if test="${not empty sessionScope.flashOk}">
+            <div class="alert alert-ok">${sessionScope.flashOk}</div>
+            <c:remove var="flashOk" scope="session"/>
+        </c:if>
 
-    <c:if test="${not empty ok}">
-      <div class="alert alert-success" style="margin-bottom:14px;">
-        <i class="fi fi-rr-check"></i>
-        <span><c:out value="${ok}"/></span>
-      </div>
-    </c:if>
+        <c:if test="${not empty sessionScope.flashError}">
+            <div class="alert alert-error">${sessionScope.flashError}</div>
+            <c:remove var="flashError" scope="session"/>
+        </c:if>
 
-    <div class="filter-bar">
-      <div class="filter-search">
-        <i class="fi fi-rr-search"></i>
-        <input type="text" id="tableSearch" placeholder="Buscar por contribuyente o impuesto...">
-      </div>
+        <div class="tabs" id="cuotaTabs" data-active-tab="${activeTab}">
+            <button type="button" class="tab-btn" data-tab="cuotas">Fraccionamientos</button>
+            <button type="button" class="tab-btn" data-tab="pagos">Pagos Pendientes</button>
+        </div>
 
-      <div class="filter-select">
-        <i class="fi fi-rr-filter"></i>
-        <select id="estadoFilter">
-          <option value="">Todos</option>
-          <option value="PENDIENTE">Pendiente</option>
-          <option value="PARCIAL">Parcial</option>
-          <option value="PAGADO">Pagado</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="table-card">
-      <table class="data-table">
-        <thead>
-        <tr>
-          <th>Impuesto</th>
-          <th>Contribuyente</th>
-          <th>Tipo</th>
-          <th>Año</th>
-          <th>Cuotas</th>
-          <th>Total</th>
-          <th>Próx. venc.</th>
-          <th>Estado</th>
-          <th></th>
-        </tr>
-        </thead>
-
-        <tbody id="tableBody">
-        <c:forEach var="f" items="${lista}">
-          <c:set var="est" value="${fn:toUpperCase(fn:trim(f.estadoGeneral))}" />
-          <tr data-estado="${est}">
-            <td class="td-code"><c:out value="${f.codigoImpuesto}"/></td>
-            <td class="contributor-name"><c:out value="${f.contribuyente}"/></td>
-
-            <td><c:out value="${f.tipo}"/></td>
-            <td><c:out value="${f.anio}"/></td>
-
-            <td><c:out value="${f.totalCuotas}"/></td>
-            <td class="td-money">S/ <c:out value="${f.totalMonto}"/></td>
-            <td><c:out value="${f.proximoVenc}"/></td>
-
-            <td>
-              <c:choose>
-                <c:when test="${est == 'PAGADO'}">
-                  <span class="badge badge-activo">Pagado</span>
-                </c:when>
-                <c:when test="${est == 'PARCIAL'}">
-                  <span class="badge badge-inactivo">Parcial</span>
+        <section class="tab-content" id="tab-cuotas">
+            <c:choose>
+                <c:when test="${mostrarHistoricosFracc}">
+                    <c:url var="toggleHistoricosFraccUrl" value="/funcionario/cuotas">
+                        <c:param name="tab" value="cuotas"/>
+                        <c:param name="historicosFracc" value="0"/>
+                        <c:param name="historicosPagos" value="${mostrarHistoricosPagos ? '1' : '0'}"/>
+                    </c:url>
                 </c:when>
                 <c:otherwise>
-                  <span class="badge badge-pendiente">Pendiente</span>
+                    <c:url var="toggleHistoricosFraccUrl" value="/funcionario/cuotas">
+                        <c:param name="tab" value="cuotas"/>
+                        <c:param name="historicosFracc" value="1"/>
+                        <c:param name="historicosPagos" value="${mostrarHistoricosPagos ? '1' : '0'}"/>
+                    </c:url>
                 </c:otherwise>
-              </c:choose>
-            </td>
+            </c:choose>
 
-            <td>
-              <button type="button"
-                  class="btn-secondary btn-ver-cuotas"
-                  data-id-impuesto="${f.idImpuesto}"
-                  data-cod-impuesto="${f.codigoImpuesto}"
-                  data-contribuyente="${fn:escapeXml(f.contribuyente)}"
-                  data-tipo="${fn:escapeXml(f.tipo)}"
-                  data-anio="${fn:escapeXml(f.anio)}">
-                  Ver cuotas
-              </button>
-            </td>
-          </tr>
-        </c:forEach>
+            <div class="tab-header">
+                <div>
+                    <h2>Listado de Fraccionamientos</h2>
+                    <p>
+                        <c:out value="${fraccionamientos.size()}"/> registros
+                        <c:if test="${mostrarHistoricosFracc}">
+                            (incluye historicos)
+                        </c:if>
+                    </p>
+                </div>
+                <div class="tab-header-actions">
+                    <div class="filter-search tab-search">
+                        <i class="fi fi-rr-search"></i>
+                        <input type="text" id="fraccionamientoSearch" placeholder="Buscar por ID, tipo o contribuyente...">
+                    </div>
+                    <div class="type-filter">
+                        <span>Tipo</span>
+                        <select id="tipoCuotasFilter">
+                            <option value="TODOS">Todos</option>
+                            <option value="PREDIAL">Predial</option>
+                            <option value="VEHICULAR">Vehicular</option>
+                            <option value="ALCABALA">Alcabala</option>
+                        </select>
+                    </div>
+                    <a href="${toggleHistoricosFraccUrl}" class="btn-toggle-history">
+                        <c:choose>
+                            <c:when test="${mostrarHistoricosFracc}">Ocultar historicos</c:when>
+                            <c:otherwise>Ver historicos</c:otherwise>
+                        </c:choose>
+                    </a>
+                </div>
+            </div>
 
-        <c:if test="${empty lista}">
-          <tr>
-            <td colspan="9" class="empty-table">
-              No hay fraccionamientos registrados
-            </td>
-          </tr>
-        </c:if>
-        </tbody>
-      </table>
+            <div class="table-card table-card-scroll">
+                <table class="data-table table-wide">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tipo</th>
+                        <th>Impuesto</th>
+                        <th>Contribuyente</th>
+                        <th>Monto Anual</th>
+                        <th>Periodicidad</th>
+                        <th>Cuotas</th>
+                        <th>Estado</th>
+                        <th>Registro</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody id="fraccionamientoTableBody">
+                    <c:choose>
+                        <c:when test="${empty fraccionamientos}">
+                            <tr>
+                                <td colspan="10">No hay fraccionamientos registrados.</td>
+                            </tr>
+                        </c:when>
+                        <c:otherwise>
+                            <c:forEach var="f" items="${fraccionamientos}">
+                                <tr data-row="1" data-tipo="${f[1]}" data-historico="${f[13]}">
+                                    <td>${f[0]}</td>
+                                    <td>${f[1]}</td>
+                                    <td>IMP-${f[2]}</td>
+                                    <td>${f[4]}</td>
+                                    <td class="helper-mono">S/ <fmt:formatNumber value="${f[6]}" type="number" maxFractionDigits="2"/></td>
+                                    <td>${f[7]}</td>
+                                    <td>${f[9]}/${f[8]}</td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${f[13] == false}">
+                                                <span class="badge badge-historico">Historico</span>
+                                            </c:when>
+                                            <c:when test="${f[11] == 'CERRADO'}">
+                                                <span class="badge badge-cerrado">Cerrado</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="badge badge-fraccionado">Activo</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                    <td><fmt:formatDate value="${f[12]}" pattern="d MMM yyyy"/></td>
+                                    <td>
+                                        <div class="action-group">
+                                            <a href="${pageContext.request.contextPath}/funcionario/cuotas?action=ver&id=${f[0]}"
+                                               class="action-icon primary"
+                                               title="Ver mas">
+                                                <i class="fi fi-rr-eye"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </c:otherwise>
+                    </c:choose>
+                    </tbody>
+                </table>
+                <div id="fraccionamientoPagination"></div>
+            </div>
+        </section>
 
-      <div class="table-footer">
-        <div class="table-info" id="tableInfo">Mostrando 0 de 0</div>
-        <div id="pagination"></div>
-      </div>
+        <section class="tab-content" id="tab-pagos">
+            <c:choose>
+                <c:when test="${mostrarHistoricosPagos}">
+                    <c:url var="toggleHistoricosPagosUrl" value="/funcionario/cuotas">
+                        <c:param name="tab" value="pagos"/>
+                        <c:param name="historicosFracc" value="${mostrarHistoricosFracc ? '1' : '0'}"/>
+                        <c:param name="historicosPagos" value="0"/>
+                    </c:url>
+                </c:when>
+                <c:otherwise>
+                    <c:url var="toggleHistoricosPagosUrl" value="/funcionario/cuotas">
+                        <c:param name="tab" value="pagos"/>
+                        <c:param name="historicosFracc" value="${mostrarHistoricosFracc ? '1' : '0'}"/>
+                        <c:param name="historicosPagos" value="1"/>
+                    </c:url>
+                </c:otherwise>
+            </c:choose>
+
+            <div class="tab-header">
+                <div>
+                    <h2>Cuotas Pendientes de Pago</h2>
+                    <p>
+                        <c:out value="${cuotasPendientes.size()}"/> cuotas por cobrar
+                        <c:if test="${mostrarHistoricosPagos}">
+                            (incluye historicos)
+                        </c:if>
+                    </p>
+                </div>
+                <div class="tab-header-actions">
+                    <div class="filter-search tab-search">
+                        <i class="fi fi-rr-search"></i>
+                        <input type="text" id="pagosSearch" placeholder="Buscar por ID, tipo o contribuyente...">
+                    </div>
+                    <div class="type-filter">
+                        <span>Tipo</span>
+                        <select id="tipoPagosFilter">
+                            <option value="TODOS">Todos</option>
+                            <option value="PREDIAL">Predial</option>
+                            <option value="VEHICULAR">Vehicular</option>
+                            <option value="ALCABALA">Alcabala</option>
+                        </select>
+                    </div>
+                    <a href="${toggleHistoricosPagosUrl}" class="btn-toggle-history">
+                        <c:choose>
+                            <c:when test="${mostrarHistoricosPagos}">Ocultar historicos</c:when>
+                            <c:otherwise>Ver historicos</c:otherwise>
+                        </c:choose>
+                    </a>
+                </div>
+            </div>
+
+            <div class="table-card table-card-scroll">
+                <table class="data-table table-wide">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tipo</th>
+                        <th>Impuesto</th>
+                        <th>Contribuyente</th>
+                        <th>Monto Anual</th>
+                        <th>Periodicidad</th>
+                        <th>Cuotas</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody id="pagosTableBody">
+                    <c:choose>
+                        <c:when test="${empty cuotasPendientes}">
+                            <tr>
+                                <td colspan="9">No hay cuotas pendientes en este momento.</td>
+                            </tr>
+                        </c:when>
+                        <c:otherwise>
+                            <c:forEach var="p" items="${cuotasPendientes}">
+                                <tr data-row="1" data-tipo="${p[1]}" data-historico="${p[13]}">
+                                    <td>${p[0]}</td>
+                                    <td>${p[1]}</td>
+                                    <td>IMP-${p[2]}</td>
+                                    <td>${p[4]}</td>
+                                    <td class="helper-mono">S/ <fmt:formatNumber value="${p[5]}" type="number" maxFractionDigits="2"/></td>
+                                    <td>${p[6]}</td>
+                                    <td>${p[8]}/${p[7]}</td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${p[13] == false}">
+                                                <span class="badge badge-historico">Historico</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="badge badge-fraccionado">Pendiente</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                    <td>
+                                        <div class="action-group">
+                                            <a href="${pageContext.request.contextPath}/funcionario/cuotas?action=ver&id=${p[0]}"
+                                               class="action-icon primary"
+                                               title="Detalle">
+                                                <i class="fi fi-rr-eye"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </c:otherwise>
+                    </c:choose>
+                    </tbody>
+                </table>
+                <div id="pagosPagination"></div>
+            </div>
+        </section>
     </div>
-
-  </section>
 </main>
 
-<!-- ================= MODAL FRACCIONAMIENTO ================= -->
-<div class="modal-overlay" id="modalFraccionamiento">
-  <div class="modal" style="max-width: 560px;">
-
-    <div class="modal-header">
-      <h2>Crear Fraccionamiento</h2>
-      <button type="button" class="modal-close" id="closeFraccionamiento" title="Cerrar">
-        <i class="fi fi-rr-cross-small"></i>
-      </button>
-    </div>
-
-    <form method="post" action="${pageContext.request.contextPath}/funcionario/cuota" id="formFraccionamiento">
-      <input type="hidden" name="action" value="crearFraccionamiento">
-
-      <div class="form-grid">
-
-        <!-- ✅ SELECT BUSCABLE PRO -->
-        <div class="form-group full">
-          <label class="form-label">Impuesto</label>
-
-          <div class="cselect" id="csImpuesto">
-            <!-- lo que el usuario ve (parece select) -->
-            <button type="button" class="cselect-display" id="impuestoDisplay" aria-haspopup="listbox" aria-expanded="false">
-              <span class="cselect-display-text" id="impuestoDisplayText">Seleccionar impuesto</span>
-              <i class="fi fi-rr-angle-small-down"></i>
-            </button>
-
-            <!-- dropdown -->
-            <div class="cselect-dropdown" id="impuestoDropdown" role="listbox" aria-hidden="true">
-              <div class="cselect-search">
-                <i class="fi fi-rr-search"></i>
-                <input
-                  type="text"
-                  id="impuestoInput"
-                  class="cselect-search-input"
-                  placeholder="Buscar impuesto..."
-                  autocomplete="off"
-                />
-              </div>
-
-              <div class="cselect-options" id="impuestoMenu"></div>
-            </div>
-          </div>
-
-          <!-- valor real para el POST -->
-          <input type="hidden" name="idImpuesto" id="idImpuesto" required>
-
-          <!-- dataset oculto para JS -->
-          <div id="impuestosData" style="display:none;">
-            <c:forEach var="i" items="${impuestos}">
-              <!-- i[0]=id_impuesto, i[1]=codigo, i[2]=contribuyente, i[3]=tipo, i[4]=anio, i[5]=monto_total -->
-              <span
-                class="imp-item"
-                data-id="${i[0]}"
-                data-codigo="${fn:escapeXml(i[1])}"
-                data-contribuyente="${fn:escapeXml(i[2])}"
-                data-tipo="${fn:escapeXml(i[3])}"
-                data-anio="${fn:escapeXml(i[4])}"
-                data-label="${fn:escapeXml(i[1])} - ${fn:escapeXml(i[2])} (${fn:escapeXml(i[3])} ${fn:escapeXml(i[4])})">
-              </span>
-            </c:forEach>
-          </div>
-
-          <small class="page-subtitle">Escribe para buscar y selecciona uno.</small>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Número de Cuotas</label>
-          <input type="number" class="form-input" name="numeroCuotas" value="4" min="1" max="48" required>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Fecha Primera Cuota</label>
-          <input type="date" class="form-input" name="fechaPrimeraCuota" required>
-        </div>
-
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn-secondary" id="cancelFraccionamiento">Cancelar</button>
-        <button type="submit" class="btn-primary">
-          <i class="fi fi-rr-disk"></i> Crear
-        </button>
-      </div>
-    </form>
-
-  </div>
-</div>
-
-<!-- ================= MODAL DETALLE CUOTAS ================= -->
-<div class="modal-overlay" id="modalDetalleCuotas">
-  <div class="modal" style="max-width: 760px; width: 95%;">
-
-    <div class="modal-header">
-      <div>
-        <h2>Detalle de Cuotas</h2>
-        <p class="page-subtitle" id="detalleSubtitle" style="margin:0;"></p>
-      </div>
-      <button type="button" class="modal-close" id="closeDetalleCuotas" title="Cerrar">
-        <i class="fi fi-rr-cross-small"></i>
-      </button>
-    </div>
-
-    <div class="table-card" style="border-radius:14px; overflow:hidden;">
-      <table class="data-table">
-        <thead>
-        <tr>
-          <th>Cuota</th>
-          <th>Monto</th>
-          <th>Vencimiento</th>
-          <th>Estado</th>
-        </tr>
-        </thead>
-        <tbody id="detalleCuotasBody">
-        <tr>
-          <td colspan="4" class="empty-table">Seleccione un fraccionamiento...</td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="modal-footer">
-      <button type="button" class="btn-secondary" id="cancelDetalleCuotas">Cerrar</button>
-    </div>
-  </div>
-</div>
-
+<script src="${pageContext.request.contextPath}/js/pagination.js?v=20260303-5"></script>
 <script>
-  const CONTEXT_PATH = "${pageContext.request.contextPath}";
-</script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const buttons = document.querySelectorAll(".tab-btn");
+        const tabs = document.querySelectorAll(".tab-content");
+        const wrapper = document.getElementById("cuotaTabs");
+        const defaultTab = wrapper?.dataset?.activeTab || "cuotas";
 
-<script src="${pageContext.request.contextPath}/js/pagination.js"></script>
-<script src="${pageContext.request.contextPath}/js/cuota.js"></script>
+        function activate(tabName) {
+            buttons.forEach(btn => {
+                btn.classList.toggle("active", btn.dataset.tab === tabName);
+            });
+            tabs.forEach(tab => {
+                tab.classList.toggle("active", tab.id === "tab-" + tabName);
+            });
+        }
 
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    window.initTablePagination({
-      perPage: 6,
-      tableBodyId: "tableBody",
-      searchId: "tableSearch",
-      estadoFilterId: "estadoFilter",
-      paginationId: "pagination",
-      tableInfoId: "tableInfo"
+        buttons.forEach(btn => {
+            btn.addEventListener("click", () => activate(btn.dataset.tab));
+        });
+
+        activate(defaultTab);
+
+        if (window.ListingTools) {
+            window.ListingTools.createTableController({
+                itemSelector: "#fraccionamientoTableBody tr[data-row='1']",
+                paginationSelector: "#fraccionamientoPagination",
+                searchInputSelector: "#fraccionamientoSearch",
+                filters: [
+                    function (row) {
+                        const filter = document.getElementById("tipoCuotasFilter");
+                        const tipo = (filter ? filter.value : "TODOS").toUpperCase();
+                        const tipoRow = (row.dataset.tipo || "").toUpperCase();
+                        return tipo === "TODOS" || tipoRow === tipo;
+                    }
+                ],
+                resetOnSelectors: ["#tipoCuotasFilter"]
+            });
+
+            window.ListingTools.createTableController({
+                itemSelector: "#pagosTableBody tr[data-row='1']",
+                paginationSelector: "#pagosPagination",
+                searchInputSelector: "#pagosSearch",
+                filters: [
+                    function (row) {
+                        const filter = document.getElementById("tipoPagosFilter");
+                        const tipo = (filter ? filter.value : "TODOS").toUpperCase();
+                        const tipoRow = (row.dataset.tipo || "").toUpperCase();
+                        return tipo === "TODOS" || tipoRow === tipo;
+                    }
+                ],
+                resetOnSelectors: ["#tipoPagosFilter"]
+            });
+        }
     });
-  });
 </script>
-
 </body>
 </html>

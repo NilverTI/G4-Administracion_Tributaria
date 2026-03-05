@@ -1,17 +1,13 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestión de Contribuyentes</title>
-
-  <!-- CSS -->
+  <title>Gestion de Contribuyentes</title>
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dashboard.css">
-  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/layout.css">
-  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/contribuyente.css">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/contribuyente.css?v=20260303-8">
 
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
@@ -19,25 +15,22 @@
 
 <body>
 
-<%@ include file="/includes/sidebar.jsp" %>
+<jsp:include page="/includes/sidebar.jsp" />
 
 <main class="main">
-  <%@ include file="/includes/topbar.jsp" %>
+  <jsp:include page="/includes/topbar.jsp" />
 
   <div class="content">
 
     <div class="page-header">
       <div class="page-header-left">
-        <h1>Gestión de Contribuyentes</h1>
-        <p>${empty lista ? 0 : lista.size()} contribuyentes registrados</p>
+        <h1>Gestion de Contribuyentes</h1>
       </div>
-
-      <button class="btn-primary" id="btnNuevo" type="button">
+      <button class="btn-primary" id="btnNuevo">
         <i class="fi fi-rr-plus"></i> Nuevo Contribuyente
       </button>
     </div>
 
-    <!-- FILTROS -->
     <div class="filter-bar">
       <div class="filter-search">
         <i class="fi fi-rr-search"></i>
@@ -54,118 +47,143 @@
       </div>
     </div>
 
-    <!-- TABLA -->
     <div class="table-card">
       <table class="data-table">
         <thead>
-        <tr>
-          <th>DNI</th>
-          <th>Nombre</th>
-          <th>Email</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
+          <tr>
+            <th>DNI</th>
+            <th>Nombre</th>
+            <th>Telefono</th>
+            <th>Email</th>
+            <th>Direccion</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
         </thead>
 
         <tbody id="tableBody">
-        <c:forEach var="c" items="${lista}">
-          <%-- c[0]=id, c[1]=dni, c[2]=nombres, c[3]=apellidos, c[5]=email, c[7]=estado --%>
-          <tr data-estado="${c[7]}">
-            <td><c:out value="${c[1]}"/></td>
-            <td><c:out value="${c[2]}"/> <c:out value="${c[3]}"/></td>
-            <td><c:out value="${c[5]}"/></td>
+          <c:forEach var="c" items="${lista}">
+            <tr data-estado="${c[7]}">
+              <td class="td-dni">${c[1]}</td>
+              <td>
+                <div class="contributor-name">${c[2]} ${c[3]}</div>
+              </td>
+              <td>${empty c[4] ? '-' : c[4]}</td>
+              <td class="td-email">${empty c[5] ? '-' : c[5]}</td>
+              <td>${empty c[6] ? '-' : c[6]}</td>
 
-            <td>
-              <c:choose>
-                <c:when test="${c[7] == 'ACTIVO'}">
-                  <span class="badge badge-activo">Activo</span>
-                </c:when>
-                <c:otherwise>
-                  <span class="badge badge-inactivo">Inactivo</span>
-                </c:otherwise>
-              </c:choose>
-            </td>
+              <td>
+                <c:choose>
+                  <c:when test="${c[7] == 'ACTIVO'}">
+                    <span class="badge badge-activo">Activo</span>
+                  </c:when>
+                  <c:otherwise>
+                    <span class="badge badge-inactivo">Inactivo</span>
+                  </c:otherwise>
+                </c:choose>
+              </td>
 
-            <td>
-              <c:choose>
-                <c:when test="${c[7] == 'ACTIVO'}">
-                  <a class="toggle-btn activo"
-                     href="${pageContext.request.contextPath}/funcionario/contribuyente?action=estado&id=${c[0]}&estado=INACTIVO"
-                     title="Desactivar">
-                    <i class="fi fi-rr-toggle-on"></i>
+              <td>
+                <div class="action-group">
+                  <a class="action-icon"
+                     href="${pageContext.request.contextPath}/funcionario/contribuyente?action=ver&id=${c[0]}"
+                     title="Ver detalle">
+                    <i class="fi fi-rr-eye"></i>
                   </a>
-                </c:when>
-                <c:otherwise>
-                  <a class="toggle-btn inactivo"
-                     href="${pageContext.request.contextPath}/funcionario/contribuyente?action=estado&id=${c[0]}&estado=ACTIVO"
-                     title="Activar">
-                    <i class="fi fi-rr-toggle-off"></i>
+
+                  <a class="action-icon edit"
+                     href="${pageContext.request.contextPath}/funcionario/contribuyente?action=editar&id=${c[0]}"
+                     title="Editar contribuyente">
+                    <i class="fi fi-rr-edit"></i>
                   </a>
-                </c:otherwise>
-              </c:choose>
-            </td>
-          </tr>
-        </c:forEach>
 
-        <c:if test="${empty lista}">
-          <tr>
-            <td colspan="5" class="empty-table" style="padding:18px 20px; text-align:center; color: var(--text-muted);">
-              No hay contribuyentes registrados.
-            </td>
-          </tr>
-        </c:if>
-
+                  <c:choose>
+                    <c:when test="${c[7] == 'ACTIVO'}">
+                      <a class="action-icon danger"
+                         href="${pageContext.request.contextPath}/funcionario/contribuyente?action=estado&id=${c[0]}&estado=INACTIVO"
+                         title="Desactivar contribuyente">
+                        <i class="fi fi-rr-toggle-on"></i>
+                      </a>
+                    </c:when>
+                    <c:otherwise>
+                      <a class="action-icon success"
+                         href="${pageContext.request.contextPath}/funcionario/contribuyente?action=estado&id=${c[0]}&estado=ACTIVO"
+                         title="Activar contribuyente">
+                        <i class="fi fi-rr-toggle-off"></i>
+                      </a>
+                    </c:otherwise>
+                  </c:choose>
+                </div>
+              </td>
+            </tr>
+          </c:forEach>
         </tbody>
       </table>
 
-      <div class="table-footer">
-        <div class="table-info" id="tableInfo">Mostrando 0 de 0</div>
-        <div id="pagination"></div>
+      <div class="table-pagination-footer">
+        <div class="pagination-left">
+          <label for="pageSizeSelect">Mostrar</label>
+          <select id="pageSizeSelect" class="page-size-select">
+            <option value="5" selected>5</option>
+            <option value="10">10</option>
+            <option value="25">25</option>
+          </select>
+        </div>
+
+        <nav class="pagination-right" id="paginationControls" aria-label="Paginacion"></nav>
       </div>
     </div>
 
   </div>
 </main>
 
-<!-- MODAL -->
-<div class="modal-overlay" id="modalOverlay" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true">
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
 
     <div class="modal-header">
       <h2>Nuevo Contribuyente</h2>
-      <button type="button" class="modal-close" id="modalClose" title="Cerrar">
+      <button type="button" class="modal-close" id="modalClose">
         <i class="fi fi-rr-cross-small"></i>
       </button>
     </div>
 
     <form method="post" action="${pageContext.request.contextPath}/funcionario/contribuyente">
       <input type="hidden" name="action" value="crear">
-      <input type="hidden" name="tipoDoc" value="DNI">
 
       <div class="form-grid">
         <div class="form-group">
           <label class="form-label">DNI</label>
-          <input class="form-input" name="numeroDoc" type="text" maxlength="20" required>
+          <input class="form-input" name="numeroDoc" type="text" required>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Teléfono</label>
-          <input class="form-input" name="telefono" type="text" maxlength="20">
+          <label class="form-label">Telefono</label>
+          <input class="form-input" name="telefono" type="text">
         </div>
 
         <div class="form-group">
           <label class="form-label">Nombres</label>
-          <input class="form-input" name="nombres" type="text" maxlength="100" required>
+          <input class="form-input" name="nombres" type="text" required>
         </div>
 
         <div class="form-group">
           <label class="form-label">Apellidos</label>
-          <input class="form-input" name="apellidos" type="text" maxlength="100" required>
+          <input class="form-input" name="apellidos" type="text" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Fecha de nacimiento</label>
+          <input class="form-input" name="fechaNacimiento" type="date">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Correo electronico</label>
+          <input class="form-input" name="email" type="email">
         </div>
 
         <div class="form-group full">
-          <label class="form-label">Correo electrónico</label>
-          <input class="form-input" name="email" type="email" maxlength="150">
+          <label class="form-label">Direccion</label>
+          <input class="form-input" name="direccion" type="text">
         </div>
       </div>
 
@@ -180,13 +198,7 @@
   </div>
 </div>
 
-<script>
-  window.__CTX__ = "${pageContext.request.contextPath}";
-</script>
-
-<!-- ✅ orden correcto: primero pagination (define initTablePagination), luego contribuyente -->
-<script src="${pageContext.request.contextPath}/js/pagination.js"></script>
-<script src="${pageContext.request.contextPath}/js/contribuyente.js"></script>
+<script src="${pageContext.request.contextPath}/js/pagination.js?v=20260303-5"></script>
 
 </body>
 </html>

@@ -9,7 +9,7 @@ import java.util.List;
 
 public class InmuebleService {
 
-    private InmuebleDAO dao = new InmuebleDAO();
+    private final InmuebleDAO dao = new InmuebleDAO();
 
     public List<Object[]> listar() {
         return dao.listar();
@@ -23,19 +23,38 @@ public class InmuebleService {
         return dao.listarZonas();
     }
 
-    public void crear(int idContribuyente, int idZona, String direccion, BigDecimal valor) {
-        dao.crear(idContribuyente, idZona, direccion, valor);
+    public void crear(
+            int idContribuyente,
+            int idZona,
+            String direccion,
+            BigDecimal valor,
+            String tipoUso,
+            BigDecimal areaTerrenoM2,
+            BigDecimal areaConstruidaM2,
+            String tipoMaterial
+    ) {
+        dao.crear(idContribuyente, idZona, direccion, valor, tipoUso, areaTerrenoM2, areaConstruidaM2, tipoMaterial);
+    }
+
+    public Object[] obtenerPorId(int idInmueble) {
+        return dao.obtenerPorId(idInmueble);
+    }
+
+    public void actualizar(
+            int idInmueble,
+            int idContribuyente,
+            int idZona,
+            String direccion,
+            BigDecimal valor,
+            String tipoUso,
+            BigDecimal areaTerrenoM2,
+            BigDecimal areaConstruidaM2,
+            String tipoMaterial
+    ) {
+        dao.actualizar(idInmueble, idContribuyente, idZona, direccion, valor, tipoUso, areaTerrenoM2, areaConstruidaM2, tipoMaterial);
     }
 
     public void cambiarEstado(int id, String estado) {
         dao.cambiarEstado(id, estado);
-    }
-
-    public int contar() {
-        return dao.contar();
-    }
-
-    public int contarActivos() {
-        return dao.contarActivos();
     }
 }

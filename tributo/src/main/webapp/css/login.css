@@ -205,6 +205,30 @@ body.login-page {
     transform: translateY(0);
 }
 
+.btn-secondary-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 11px 20px;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all .2s;
+}
+
+.btn-secondary-login:hover {
+    background: rgba(240, 244, 249, .85);
+    color: var(--text);
+    border-color: #cbd5e1;
+}
+
 /* Alert bootstrap redondeado al estilo del sistema */
 .alert {
     border-radius: 12px;

@@ -29,12 +29,13 @@ public class AuthFilter implements Filter {
 
         // 🔹 Rutas públicas
         boolean loginRequest = path.equals(context + "/login");
+        boolean registroRequest = path.equals(context + "/registro");
         boolean loginPage = path.contains("/views/auth/");
         boolean resources = path.contains("/css/")
                 || path.contains("/js/")
                 || path.contains("/images/");
 
-        if (loginRequest || loginPage || resources) {
+        if (loginRequest || registroRequest || loginPage || resources) {
             chain.doFilter(request, response);
             return;
         }
@@ -46,16 +47,15 @@ public class AuthFilter implements Filter {
             return;
         }
 
-        System.out.println("------------");
-        System.out.println("PATH: " + path);
-        System.out.println("USUARIO EN SESION: " + (usuario != null));
-        System.out.println("ROL: " + usuario.getRol().getNombre());
-        System.out.println("------------");
-
         // 🔹 Validar acceso por rol
         String rol = usuario.getRol().getNombre();
 
-        if (path.contains("/views/funcionario/")) {
+        boolean funcionarioPath = path.startsWith(context + "/funcionario/")
+                || path.contains("/views/funcionario/");
+        boolean contribuyentePath = path.startsWith(context + "/contribuyente/")
+                || path.contains("/views/contribuyente/");
+
+        if (funcionarioPath) {
 
             if (!rol.equalsIgnoreCase("ADMIN")
                     && !rol.equalsIgnoreCase("FUNCIONARIO")) {
@@ -65,7 +65,7 @@ public class AuthFilter implements Filter {
             }
         }
 
-        if (path.contains("/views/contribuyente/")) {
+        if (contribuyentePath) {
 
             if (!rol.equalsIgnoreCase("CONTRIBUYENTE")) {
 

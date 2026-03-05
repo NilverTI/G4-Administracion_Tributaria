@@ -1,108 +1,96 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-
 <%
     String current = request.getRequestURI();
-    String ctx = request.getContextPath();
-
-    com.tributaria.entity.Usuario u =
-            (com.tributaria.entity.Usuario) session.getAttribute("usuario");
-
-    String nombres = (u != null && u.getPersona() != null && u.getPersona().getNombres() != null)
-            ? u.getPersona().getNombres()
-            : "Usuario";
+    String currentTab = request.getParameter("tab");
+    boolean cuotasPath = current.contains("/funcionario/cuotas");
+    boolean pagosTab = "pagos".equalsIgnoreCase(currentTab);
+    boolean esAdmin = session.getAttribute("usuario") != null
+            && ((com.tributaria.entity.Usuario) session.getAttribute("usuario")).getRol() != null
+            && "ADMIN".equalsIgnoreCase(((com.tributaria.entity.Usuario) session.getAttribute("usuario")).getRol().getNombre());
 %>
 
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-brand">
-    <div class="brand-icon"><i class="fi fi-rr-chart-histogram"></i></div>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
-    <div class="brand-text">
-      <h3>SAT Municipal</h3>
-      <p>Panel Funcionario</p>
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-icon"><i class="fi fi-rr-chart-histogram"></i></div>
+        <div class="brand-text">
+            <h3>SAT Municipal</h3>
+            <p>Panel Funcionario</p>
+        </div>
+        <button class="sidebar-toggle" type="button" title="Ocultar menu">
+            <i class="fi fi-rr-angle-left"></i>
+        </button>
     </div>
 
-    <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Colapsar sidebar">
-      <i class="fi fi-rr-angle-left"></i>
-    </button>
-  </div>
+    <nav class="sidebar-nav">
+        <a href="${pageContext.request.contextPath}/funcionario/dashboard"
+           class="nav-item <%= current.contains("/funcionario/dashboard") ? "active" : "" %>"
+           title="Dashboard">
+            <span class="icon"><i class="fi fi-rr-chart-pie-alt"></i></span>
+            <span class="nav-label">Dashboard</span>
+        </a>
 
-  <nav class="sidebar-nav">
-    <a href="<%= ctx %>/funcionario/dashboard"
-       data-title="Dashboard"
-       class="nav-item <%= current.contains("/funcionario/dashboard") ? "active" : "" %>">
-      <span class="icon"><i class="fi fi-rr-chart-pie-alt"></i></span>
-      <span class="label">Dashboard</span>
-    </a>
+        <a href="${pageContext.request.contextPath}/funcionario/contribuyente"
+           class="nav-item <%= current.contains("/funcionario/contribuyente") ? "active" : "" %>"
+           title="Contribuyentes">
+            <span class="icon"><i class="fi fi-rr-users"></i></span>
+            <span class="nav-label">Contribuyentes</span>
+        </a>
 
-    <a href="<%= ctx %>/funcionario/contribuyente"
-       data-title="Contribuyentes"
-       class="nav-item <%= current.contains("/funcionario/contribuyente") ? "active" : "" %>">
-      <span class="icon"><i class="fi fi-rr-users"></i></span>
-      <span class="label">Contribuyentes</span>
-    </a>
+        <a href="${pageContext.request.contextPath}/funcionario/inmueble"
+           class="nav-item <%= current.contains("/funcionario/inmueble") ? "active" : "" %>"
+           title="Inmuebles">
+            <span class="icon"><i class="fi fi-rr-building"></i></span>
+            <span class="nav-label">Inmuebles</span>
+        </a>
 
-    <a href="<%= ctx %>/funcionario/inmueble"
-       data-title="Inmuebles"
-       class="nav-item <%= current.contains("/funcionario/inmueble") ? "active" : "" %>">
-      <span class="icon"><i class="fi fi-rr-building"></i></span>
-      <span class="label">Inmuebles</span>
-    </a>
+        <a href="${pageContext.request.contextPath}/funcionario/vehiculo"
+           class="nav-item <%= current.contains("/funcionario/vehiculo") ? "active" : "" %>"
+           title="Vehiculos">
+            <span class="icon"><i class="fi fi-rr-car"></i></span>
+            <span class="nav-label">Vehiculos</span>
+        </a>
 
-    <a href="<%= ctx %>/funcionario/vehiculo"
-       data-title="Vehículos"
-       class="nav-item <%= current.contains("/funcionario/vehiculo") ? "active" : "" %>">
-      <span class="icon"><i class="fi fi-rr-car"></i></span>
-      <span class="label">Vehículos</span>
-    </a>
+        <a href="${pageContext.request.contextPath}/funcionario/impuesto"
+           class="nav-item <%= current.contains("/funcionario/impuesto") ? "active" : "" %>"
+           title="Impuestos">
+            <span class="icon"><i class="fi fi-rr-receipt"></i></span>
+            <span class="nav-label">Impuestos</span>
+        </a>
 
-    <a href="<%= ctx %>/funcionario/impuesto"
-       data-title="Impuestos"
-       class="nav-item <%= current.contains("/funcionario/impuesto") ? "active" : "" %>">
-      <span class="icon"><i class="fi fi-rr-receipt"></i></span>
-      <span class="label">Impuestos</span>
-    </a>
+        <a href="${pageContext.request.contextPath}/funcionario/cuotas?tab=cuotas"
+           class="nav-item <%= cuotasPath && !pagosTab ? "active" : "" %>"
+           title="Cuotas">
+            <span class="icon"><i class="fi fi-rr-calendar"></i></span>
+            <span class="nav-label">Cuotas</span>
+        </a>
 
-    <a href="<%= ctx %>/funcionario/cuota"
-       data-title="Cuotas"
-       class="nav-item <%= current.contains("/funcionario/cuota") ? "active" : "" %>">
-      <span class="icon"><i class="fi fi-rr-calendar"></i></span>
-      <span class="label">Cuotas</span>
-    </a>
+        <a href="${pageContext.request.contextPath}/funcionario/cuotas?tab=pagos"
+           class="nav-item <%= cuotasPath && pagosTab ? "active" : "" %>"
+           title="Pagos">
+            <span class="icon"><i class="fi fi-rr-credit-card"></i></span>
+            <span class="nav-label">Pagos</span>
+        </a>
 
-    <a href="<%= ctx %>/funcionario/pago"
-       data-title="Pagos"
-       class="nav-item <%= current.contains("/funcionario/pago") ? "active" : "" %>">
-      <span class="icon"><i class="fi fi-rr-credit-card"></i></span>
-      <span class="label">Pagos</span>
-    </a>
+        <% if (esAdmin) { %>
+        <a href="${pageContext.request.contextPath}/funcionario/configuracion"
+           class="nav-item <%= current.contains("/funcionario/configuracion") ? "active" : "" %>"
+           title="Configuracion">
+            <span class="icon"><i class="fi fi-rr-settings"></i></span>
+            <span class="nav-label">Configuracion</span>
+        </a>
+        <% } %>
+    </nav>
 
-    <!--
-    <button class="nav-item" type="button" data-title="Reportes">
-      <span class="icon"><i class="fi fi-rr-stats"></i></span>
-      <span class="label">Reportes</span>
-    </button>
-    -->
-
-    <a href="<%= ctx %>/funcionario/configuracion"
-       data-title="Configuración"
-       class="nav-item <%= current.contains("/funcionario/configuracion") ? "active" : "" %>">
-      <span class="icon"><i class="fi fi-rr-settings"></i></span>
-      <span class="label">Configuración</span>
-    </a>
-  </nav>
-
-  <div class="sidebar-user">
-    <div class="user-avatar">AT</div>
-
-    <div class="user-info">
-      <h4><%= nombres %></h4>
-      <p>admin@sat.gob.pe</p>
+    <div class="sidebar-user">
+        <div class="user-avatar">${sessionScope.usuario.persona.nombres.charAt(0)}</div>
+        <div class="user-info">
+            <h4>${sessionScope.usuario.persona.nombres}</h4>
+            <p>${sessionScope.usuario.username}</p>
+        </div>
+        <a href="${pageContext.request.contextPath}/logout" class="logout-btn" title="Cerrar sesion">
+            <i class="fi fi-rr-sign-out-alt"></i>
+        </a>
     </div>
-
-    <a class="logout-btn" href="<%= ctx %>/logout" title="Cerrar sesión">
-      <i class="fi fi-rr-sign-out-alt"></i>
-    </a>
-  </div>
 </aside>
-
-<script src="<%= request.getContextPath() %>/js/sidebar.js"></script>
+<script src="${pageContext.request.contextPath}/js/app-shell.js?v=20260303-1"></script>

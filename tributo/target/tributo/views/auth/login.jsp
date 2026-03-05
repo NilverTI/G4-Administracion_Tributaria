@@ -8,25 +8,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Login - Sistema Tributario</title>
 
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Bootstrap 5 CDN (solo para alert, spacing, etc.) -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Tu CSS -->
   <link rel="stylesheet" href="<c:url value='/css/login.css'/>">
 </head>
 
 <body class="login-page">
-  <!-- Fondo Canvas (tipo Opulento) -->
   <canvas id="opulento-bg" aria-hidden="true"></canvas>
 
   <main class="login-wrap">
-    <section class="login-card" aria-label="Formulario de inicio de sesión">
-
+    <section class="login-card" aria-label="Formulario de inicio de sesion">
       <header class="login-header">
         <div class="brand">
           <div class="brand-icon">ST</div>
@@ -39,55 +33,58 @@
 
       <div class="login-body">
         <form action="login" method="post" class="login-form">
-
-          <!-- Usuario -->
           <div class="form-group">
             <label class="form-label" for="username">Usuario</label>
             <input class="form-input"
                    type="text"
                    id="username"
                    name="username"
-                   placeholder="Ingrese su usuario"
+                   placeholder="Ingrese su usuario o correo"
                    autocomplete="username"
                    autofocus
                    required />
           </div>
 
-          <!-- Password -->
           <div class="form-group">
-            <label class="form-label" for="password">Contraseña</label>
+            <label class="form-label" for="password">Contrasena</label>
             <input class="form-input"
                    type="password"
                    id="password"
                    name="password"
-                   placeholder="••••••••"
+                   placeholder="********"
                    autocomplete="current-password"
                    required />
           </div>
 
-          <!-- Error (JSTL original) -->
           <c:if test="${not empty error}">
             <div class="alert alert-danger mt-3" role="alert">
               ${error}
             </div>
           </c:if>
 
-          <!-- Submit -->
+          <c:if test="${not empty sessionScope.flashOk}">
+            <div class="alert alert-success mt-3" role="alert">
+              ${sessionScope.flashOk}
+            </div>
+            <c:remove var="flashOk" scope="session"/>
+          </c:if>
+
           <button type="submit" class="btn-primary-login">
-            Iniciar sesión
+            Iniciar sesion
           </button>
 
-          <p class="login-foot">
-            © <span id="year"></span> Sistema Tributario
-          </p>
+          <a href="<c:url value='/registro'/>" class="btn-secondary-login">
+            Crear cuenta
+          </a>
 
+          <p class="login-foot">
+            &copy; <span id="year"></span> Sistema Tributario
+          </p>
         </form>
       </div>
-
     </section>
   </main>
 
-  <!-- JS -->
   <script src="<c:url value='/js/login.js'/>"></script>
 </body>
 </html>

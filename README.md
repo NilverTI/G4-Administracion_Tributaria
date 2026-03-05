@@ -1,65 +1,59 @@
-# 📘 G4 – Sistema de Administración Tributaria  
-## 🌐 Proyecto del Curso: Desarrollo de Aplicaciones Web
+# Sistema de Administracion Tributaria
 
-Este repositorio contiene el desarrollo del proyecto académico correspondiente al curso de **Desarrollo de Aplicaciones Web**, elaborado por el **Grupo 4**.
+Aplicacion web para la gestion de contribuyentes, bienes e impuestos municipales.
 
-El proyecto está orientado al **análisis, diseño y desarrollo de un sistema de Administración Tributaria**, aplicando conceptos de programación web junto con fundamentos básicos del sistema tributario.
+## Stack
+- Java 21
+- Maven (WAR)
+- Jakarta Servlet 6 + JSP/JSTL
+- JPA 3.1 + Hibernate 6
+- MySQL 8
 
----
+## Funcionalidades
+- Autenticacion y control de acceso por rol (`ADMIN`, `FUNCIONARIO`, `CONTRIBUYENTE`).
+- Modulo de funcionario: dashboard, contribuyentes, inmuebles, vehiculos, impuestos (vehicular/predial/alcabala), cuotas y configuracion.
+- Modulo de contribuyente: dashboard, cuotas, pagos, bienes y perfil.
 
-## 🎯 Objetivos del Proyecto
+## Actores
+- `ADMIN`: gestiona configuracion general y cuentas internas.
+- `FUNCIONARIO`: opera padrones, bienes, impuestos y cuotas.
+- `CONTRIBUYENTE`: consulta su estado tributario, pagos, bienes y perfil.
 
-- Desarrollar una aplicación web que permita representar un **sistema de control tributario**.  
-- Analizar los distintos **tipos de tributos** aplicables a personas y bienes.  
-- Definir correctamente las **entidades y atributos** del sistema tributario.  
-- Aplicar los conocimientos adquiridos en el curso de Desarrollo de Aplicaciones Web.  
-- Elaborar documentación clara, ordenada y comprensible del sistema desarrollado.
+## Capturas
+### Login
+![Login](assets/login.jpeg)
 
----
+### Admin
+![Admin](assets/admin.jpeg)
 
-## 🧾 Alcance del Sistema
+### Funcionario
+![Funcionario](assets/FUNCIONARIO.jpeg)
 
-El sistema contempla el control y gestión de tributos aplicados a:
+### Contribuyente
+![Contribuyente](assets/Contribuyente.jpeg)
 
-- **Personas**  
-- **Bienes**  
-  - Vehículos (autos)  
-  - Servicios básicos (luz, agua)
+## Estructura
+- `tributo/src/main/java`: controladores, servicios, DAO, entidades y filtros.
+- `tributo/src/main/webapp/views`: vistas JSP por modulo.
+- `tributo/src/main/resources/META-INF/persistence.xml`: configuracion JPA/MySQL.
+- `tributo/database/sql_final/tributaria.sql`: script base completo con datos de prueba.
+- `tributo/database/sql/*.sql`: migraciones incrementales.
 
-Para cada caso, el sistema permitirá identificar el **estado del tributo**, considerando si:
-- El tributo está **pagado**
-- El tributo **no está pagado**
+## Requisitos
+- JDK 21
+- Maven 3.9+
+- MySQL 8+
+- Apache Tomcat 10.1+ (Jakarta EE)
 
----
+## Ejecucion local
+1. Ejecuta `tributo/database/sql_final/tributaria.sql` en MySQL.
+2. Ajusta usuario/clave en `tributo/src/main/resources/META-INF/persistence.xml`.
+3. Compila el proyecto:
+   ```bash
+   mvn -f tributo/pom.xml clean package
+   ```
+4. Despliega `tributo/target/tributo.war` en Tomcat.
+5. Abre `http://localhost:8080/tributo/login`.
 
-## 🛠️ Contenido del Repositorio
-
-- Análisis del sistema de administración tributaria  
-- Definición de entidades y atributos  
-- Casos prácticos del sistema tributario  
-- Desarrollo de la aplicación web  
-- Documentación técnica  
-- Recursos utilizados durante el desarrollo del proyecto
-
----
-
-## 👥 Integrantes del Grupo 4
-
-| Integrante | Nombre Completo |
-|-----------|------------------|
-| 👤 | **Goicochea Flores, Euler Iván** |
-| 👤 | **Tantaleán Inga, Nilver** |
-| 👤 | **Cruz Lozada, Stephany** |
-| 👤 | **Mejia Quiroz, Arnold braian** |
-
----
-
-## 📅 Año Académico
-**20260**
-
----
-
-## 📌 Notas Finales
-
-Este proyecto ha sido desarrollado con dedicación y compromiso, asegurando que los contenidos reunidos cumplan con los lineamientos brindados en el curso.
-
+## Estado de build
+- Compilacion verificada con `mvn -f tributo/pom.xml -DskipTests package`.

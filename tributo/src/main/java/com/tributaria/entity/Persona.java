@@ -1,6 +1,7 @@
 package com.tributaria.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -32,6 +33,9 @@ public class Persona {
 
     @Column(name = "direccion", length = 255)
     private String direccion;
+
+    @Column(name = "fecha_nacimiento")
+    private LocalDate fechaNacimiento;
 
     @Column(name = "estado")
     private String estado;
@@ -109,6 +113,14 @@ public class Persona {
 
     public String getEstado() {
         return estado;
+    }
+
+    public LocalDate getFechaNacimiento() {
+        return fechaNacimiento;
+    }
+
+    public void setFechaNacimiento(LocalDate fechaNacimiento) {
+        this.fechaNacimiento = fechaNacimiento;
     }
 
     public void setEstado(String estado) {

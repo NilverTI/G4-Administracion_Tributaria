@@ -10,6 +10,7 @@ public class Alcabala {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_alcabala")
     private Integer id;
 
     @ManyToOne

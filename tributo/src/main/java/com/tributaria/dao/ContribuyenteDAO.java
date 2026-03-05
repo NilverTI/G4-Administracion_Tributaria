@@ -3,6 +3,8 @@ package com.tributaria.dao;
 import com.tributaria.util.JPAUtil;
 import jakarta.persistence.*;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 public class ContribuyenteDAO {
@@ -23,6 +25,39 @@ public class ContribuyenteDAO {
         }
     }
 
+    public Object[] obtenerPorId(int idContribuyente) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            Query query = em.createNativeQuery(
+                    "SELECT " +
+                            "c.id_contribuyente, " +
+                            "c.fecha_registro_tributario, " +
+                            "c.estado, " +
+                            "p.tipo_documento, " +
+                            "p.numero_documento, " +
+                            "p.nombres, " +
+                            "p.apellidos, " +
+                            "p.telefono, " +
+                            "p.email, " +
+                            "p.direccion, " +
+                            "p.fecha_nacimiento, " +
+                            "p.estado " +
+                            "FROM contribuyentes c " +
+                            "INNER JOIN personas p ON p.id_persona = c.id_persona " +
+                            "WHERE c.id_contribuyente = ?1 " +
+                            "LIMIT 1"
+            );
+            query.setParameter(1, idContribuyente);
+            List<?> rows = query.getResultList();
+            if (rows.isEmpty()) {
+                return null;
+            }
+            return (Object[]) rows.get(0);
+        } finally {
+            em.close();
+        }
+    }
+
     public void crear(
             String tipoDoc,
             String numeroDoc,
@@ -30,7 +65,8 @@ public class ContribuyenteDAO {
             String apellidos,
             String telefono,
             String email,
-            String direccion) {
+            String direccion,
+            LocalDate fechaNacimiento) {
 
         EntityManager em = JPAUtil.getEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -48,6 +84,7 @@ public class ContribuyenteDAO {
             query.registerStoredProcedureParameter("p_telefono", String.class, ParameterMode.IN);
             query.registerStoredProcedureParameter("p_email", String.class, ParameterMode.IN);
             query.registerStoredProcedureParameter("p_direccion", String.class, ParameterMode.IN);
+            query.registerStoredProcedureParameter("p_fecha_nacimiento", Date.class, ParameterMode.IN);
 
             query.setParameter("p_tipo_documento", tipoDoc);
             query.setParameter("p_numero_documento", numeroDoc);
@@ -56,6 +93,7 @@ public class ContribuyenteDAO {
             query.setParameter("p_telefono", telefono);
             query.setParameter("p_email", email);
             query.setParameter("p_direccion", direccion);
+            query.setParameter("p_fecha_nacimiento", fechaNacimiento == null ? null : Date.valueOf(fechaNacimiento));
 
             query.execute();
 
@@ -92,6 +130,91 @@ public class ContribuyenteDAO {
 
         } catch (Exception e) {
             tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public void actualizar(
+            int idContribuyente,
+            String numeroDoc,
+            String nombres,
+            String apellidos,
+            String telefono,
+            String email,
+            String direccion,
+            LocalDate fechaNacimiento
+    ) {
+        EntityManager em = JPAUtil.getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+
+            List<?> personas = em.createNativeQuery(
+                            "SELECT c.id_persona " +
+                                    "FROM contribuyentes c " +
+                                    "WHERE c.id_contribuyente = ?1 " +
+                                    "LIMIT 1")
+                    .setParameter(1, idContribuyente)
+                    .getResultList();
+
+            if (personas.isEmpty()) {
+                throw new IllegalArgumentException("No se encontro el contribuyente.");
+            }
+
+            int idPersona = ((Number) personas.get(0)).intValue();
+
+            Number totalUsuarios = (Number) em.createNativeQuery(
+                            "SELECT COUNT(*) FROM usuarios WHERE id_persona = ?1")
+                    .setParameter(1, idPersona)
+                    .getSingleResult();
+
+            String correoNormalizado = email == null ? null : email.trim();
+            if (correoNormalizado != null && correoNormalizado.isEmpty()) {
+                correoNormalizado = null;
+            }
+
+            if (totalUsuarios.intValue() > 0 && correoNormalizado == null) {
+                throw new IllegalArgumentException("No puede dejar vacio el correo porque el contribuyente tiene cuenta de acceso.");
+            }
+
+            em.createNativeQuery(
+                            "UPDATE personas " +
+                                    "SET numero_documento = ?1, " +
+                                    "nombres = ?2, " +
+                                    "apellidos = ?3, " +
+                                    "telefono = ?4, " +
+                                    "email = ?5, " +
+                                    "direccion = ?6, " +
+                                    "fecha_nacimiento = ?7 " +
+                                    "WHERE id_persona = ?8")
+                    .setParameter(1, numeroDoc)
+                    .setParameter(2, nombres)
+                    .setParameter(3, apellidos)
+                    .setParameter(4, telefono)
+                    .setParameter(5, correoNormalizado)
+                    .setParameter(6, direccion)
+                    .setParameter(7, fechaNacimiento == null ? null : Date.valueOf(fechaNacimiento))
+                    .setParameter(8, idPersona)
+                    .executeUpdate();
+
+            if (totalUsuarios.intValue() > 0 && correoNormalizado != null) {
+                em.createNativeQuery(
+                                "UPDATE usuarios " +
+                                        "SET username = ?1 " +
+                                        "WHERE id_persona = ?2")
+                        .setParameter(1, correoNormalizado.toLowerCase())
+                        .setParameter(2, idPersona)
+                        .executeUpdate();
+            }
+
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
             throw e;
         } finally {
             em.close();
@@ -135,7 +258,16 @@ public class ContribuyenteDAO {
     public List<Object[]> listarActivosCombo() {
     EntityManager em = JPAUtil.getEntityManager();
     try {
-        Query q = em.createNativeQuery("CALL sp_listar_contribuyentes_combo()");
+        Query q = em.createNativeQuery(
+                "SELECT c.id_contribuyente, " +
+                        "CONCAT(p.nombres, ' ', p.apellidos) AS contribuyente, " +
+                        "p.numero_documento " +
+                        "FROM contribuyentes c " +
+                        "INNER JOIN personas p ON p.id_persona = c.id_persona " +
+                        "WHERE c.estado = 'ACTIVO' " +
+                        "AND p.estado = 'ACTIVO' " +
+                        "ORDER BY p.nombres, p.apellidos"
+        );
         return q.getResultList();
     } finally {
         em.close();

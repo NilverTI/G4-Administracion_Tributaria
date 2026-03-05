@@ -15,12 +15,11 @@
         <class>com.tributaria.entity.Rol</class>
         <class>com.tributaria.entity.Funcionario</class>
         <class>com.tributaria.entity.Contribuyente</class>
+        <class>com.tributaria.entity.Zona</class>
         <class>com.tributaria.entity.Inmueble</class>
         <class>com.tributaria.entity.Vehiculo</class>
-        <class>com.tributaria.entity.Impuesto</class>
-        <class>com.tributaria.entity.Cuota</class>
-        <class>com.tributaria.entity.Pago</class>
-        <class>com.tributaria.entity.Configuracion</class>
+        <class>com.tributaria.entity.Alcabala</class>
+        <class>com.tributaria.entity.UIT</class>
 
         <properties>
 
